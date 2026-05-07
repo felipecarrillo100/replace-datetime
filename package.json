@@ -1,0 +1,80 @@
+{
+  "name": "replace-datetime",
+  "version": "4.0.0",
+  "description": "A lightweight but complete datetime picker component compatible with React 18/19",
+  "homepage": "https://github.com/felipecarrillo100/replace-datetime",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/felipecarrillo100/replace-datetime"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "css",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint src/ test/ && echo 'Linting OK! 💪'",
+    "playground": "vite src/playground",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "test:all": "npm run typecheck && npm run test && echo 'All tests passed! 🤘'"
+  },
+  "keywords": [
+    "react",
+    "react-component",
+    "datepicker",
+    "timepicker",
+    "datetimepicker",
+    "datetime"
+  ],
+  "author": "Javier Marquez",
+  "license": "MIT",
+  "peerDependencies": {
+    "moment": "^2.16.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^9.19.0",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^15.14.0",
+    "jsdom": "^26.0.0",
+    "moment": "^2.30.1",
+    "moment-timezone": "^0.5.45",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.23.0",
+    "vite": "^8.0.11",
+    "vitest": "^4.1.5"
+  },
+  "dependencies": {
+    "prop-types": "^15.8.1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

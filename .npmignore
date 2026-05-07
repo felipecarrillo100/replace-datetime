@@ -1,0 +1,11 @@
+# Folders
+node_modules
+example
+.idea
+test
+
+# Files
+*~
+.DS_Store
+npm-debug.log
+webpack.config.js
