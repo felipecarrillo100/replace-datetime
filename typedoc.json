@@ -1,0 +1,13 @@
+{
+  "entryPoints": ["src/index.tsx"],
+  "out": "docs",
+  "cleanOutputDir": false,
+  "name": "replace-datetime API",
+  "includeVersion": true,
+  "excludeInternal": true,
+  "readme": "README.md",
+  "skipErrorChecking": true,
+  "exclude": ["src/playground/**", "src/views/**", "src/parts/**", "test/**"],
+  "highlightLanguages": ["typescript", "tsx", "javascript", "jsx", "bash", "diff", "json", "html"],
+  "treatWarningsAsErrors": false
+}

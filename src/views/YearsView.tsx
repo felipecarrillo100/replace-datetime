@@ -1,3 +1,4 @@
+/** @internal */
 import React from 'react';
 import moment from 'moment';
 import ViewNavigation from '../parts/ViewNavigation';

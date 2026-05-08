@@ -7,3 +7,7 @@ npm-debug.log
 
 # Don't force sha validation (it differs depending on the OS)
 package-lock.json
+
+# Generated output (deployed via GitHub Actions)
+docs
+demo/dist

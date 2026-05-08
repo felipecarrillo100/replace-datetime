@@ -3,9 +3,13 @@ node_modules
 example
 .idea
 test
+docs
+demo
+.github
 
 # Files
 *~
 .DS_Store
 npm-debug.log
 webpack.config.js
+typedoc.json
