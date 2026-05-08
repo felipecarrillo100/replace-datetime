@@ -336,15 +336,14 @@ export default function App() {
         <Card
           id="demo-ref"
           title="Imperative Ref"
-          description="Attach a ref to programmatically navigate the calendar view."
+          description="Attach a ref to programmatically navigate the calendar — click the buttons to see it jump."
           output={fmtDisplay(refDate)}
         >
           <Datetime
             ref={dtRef}
+            input={false}
             timeFormat={false}
-            closeOnSelect
             onChange={setRefDate}
-            inputProps={{ id: 'input-ref', placeholder: 'Pick a date…' }}
           />
           <div className="ref-buttons">
             <button id="btn-jump-today" className="btn btn-sm" onClick={jumpToToday}>
@@ -354,11 +353,11 @@ export default function App() {
               Jump to Next Year
             </button>
           </div>
-          <CodeSnippet code={`const ref = useRef(null);
-<Datetime ref={ref} ... />
+          <CodeSnippet code={`const ref = useRef<DatetimeHandle>(null);
+<Datetime ref={ref} input={false} ... />
 // later:
-ref.current.setViewDate(moment());
-ref.current.navigate('months');`} />
+ref.current?.setViewDate(moment());
+ref.current?.navigate('months');`} />
         </Card>
 
       </main>
