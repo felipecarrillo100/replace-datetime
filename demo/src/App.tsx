@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import moment from 'moment';
 import 'moment/locale/es';
 import 'moment/locale/fr';
+import 'moment/locale/de';
+
 import Datetime, { DateTimeProps, DatetimeHandle } from 'replace-datetime';
 import 'replace-datetime/css/react-datetime.css';
 
@@ -276,7 +278,7 @@ export default function App() {
         <Card
           id="demo-locale"
           title="Locale Support"
-          description="Switch locale dynamically — month/day names and format update immediately."
+          description="Switch locale dynamically — month/day names, first day of week, and format update immediately."
           output={fmtDisplay(localizedDate)}
         >
           <div className="locale-switcher" role="group" aria-label="Select locale">
@@ -294,10 +296,9 @@ export default function App() {
           <Datetime
             key={locale}
             locale={locale}
+            input={false}
             timeFormat={false}
-            closeOnSelect
             onChange={setLocalizedDate}
-            inputProps={{ id: 'input-locale', placeholder: 'Pick a date…' }}
           />
           <CodeSnippet code={`<Datetime
   locale="es"

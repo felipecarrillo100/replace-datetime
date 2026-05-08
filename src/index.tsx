@@ -755,8 +755,11 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 	};
 
 	const renderCalendar = () => {
+		const localizedViewDate = viewDate.clone();
+		if (props.locale) localizedViewDate.locale(props.locale);
+
 		const viewProps: any = {
-			viewDate: viewDate.clone(),
+			viewDate: localizedViewDate,
 			selectedDate,
 			isValidDate: props.isValidDate || (() => true),
 			updateDate,

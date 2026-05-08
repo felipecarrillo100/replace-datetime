@@ -11,17 +11,27 @@ export default defineConfig({
   },
   resolve: {
     alias: [
-      // Route the CSS subpath directly to the css/ folder
+      // Route CSS subpath to the css/ folder
       {
         find: /^replace-datetime\/css\/(.*)/,
         replacement: path.resolve(__dirname, '../css/$1'),
       },
-      // Route everything else to the library source
+      // Route library imports to local source
       {
         find: 'replace-datetime',
         replacement: path.resolve(__dirname, '../src/index.tsx'),
       },
+      // Force a single moment singleton so locale registrations reach the library.
+      // moment/locale/* must come BEFORE the bare moment alias.
+      {
+        find: /^moment\/locale\/(.*)/,
+        replacement: path.resolve(__dirname, '../node_modules/moment/locale/$1'),
+      },
+      {
+        find: /^moment$/,
+        replacement: path.resolve(__dirname, '../node_modules/moment/moment.js'),
+      },
     ],
-    dedupe: ['react', 'react-dom'],
+    dedupe: ['react', 'react-dom', 'moment'],
   },
 });
