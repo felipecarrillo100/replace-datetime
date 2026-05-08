@@ -5,9 +5,10 @@ A lightweight but complete datetime picker component for React, fully compatible
 This project is a modernized fork of the original `react-datetime` library, rewritten in TypeScript with functional components and modern React hooks.
 
 📅 [Try the Live Demo](https://felipecarrillo100.github.io/replace-datetime/demo/) — All picker modes, fully interactive.
+
 📚 [View the API Documentation](https://felipecarrillo100.github.io/replace-datetime/)
 
-
+---
 ## Why `replace-datetime`?
 
 The original `react-datetime` library was a staple of the React ecosystem for years. However, as React evolved towards functional components, concurrent rendering, and strict mode, the original class-based implementation became increasingly difficult to maintain and incompatible with modern standards like React 18 and 19.
