@@ -357,4 +357,4 @@ interface DateTimeProps {
  */
 declare const Datetime: React.ForwardRefExoticComponent<DateTimeProps & React.RefAttributes<unknown>>;
 
-export { type DateTimeProps, type ViewMode, Datetime as default };
+export { type DateTimeProps, Datetime, type ViewMode, Datetime as default };

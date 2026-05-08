@@ -746,4 +746,6 @@ const Datetime = forwardRef((props: DateTimeProps, ref) => {
 Datetime.displayName = 'Datetime';
 (Datetime as any).moment = moment;
 
+/** @public */
+export { Datetime };
 export default Datetime;

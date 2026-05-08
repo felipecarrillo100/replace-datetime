@@ -6,5 +6,4 @@ tmp
 npm-debug.log
 
 # Generated output (deployed via GitHub Actions)
-docs
 demo/dist
