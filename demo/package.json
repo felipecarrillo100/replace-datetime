@@ -9,6 +9,7 @@
     "replace-datetime": "file:.."
   },
   "devDependencies": {
+    "@types/node": "^25.6.2",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.1",
