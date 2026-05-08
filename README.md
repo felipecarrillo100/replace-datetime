@@ -98,6 +98,80 @@ datetimeRef.current?.navigate('years');
 datetimeRef.current?.setViewDate(new Date());
 ```
 
+## Theming
+
+`replace-datetime` ships with built-in **light and dark themes** driven entirely by CSS custom properties — no extra packages, no JS, no `!important` overrides.
+
+### How themes are applied
+
+| Scenario | Result |
+|---|---|
+| No `data-theme` set, OS prefers light | ☀️ Light theme |
+| No `data-theme` set, OS prefers dark | 🌙 Dark theme (via `prefers-color-scheme`) |
+| `data-theme="dark"` on any ancestor | 🌙 Dark theme (OS preference ignored) |
+| `data-theme="light"` on any ancestor | ☀️ Light theme (OS preference ignored) |
+
+### Global theme toggle (React)
+
+```tsx
+import { useState, useEffect } from 'react';
+
+function App() {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  return (
+    <>
+      <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}>
+        Toggle theme
+      </button>
+      <Datetime />
+    </>
+  );
+}
+```
+
+### Per-picker override
+
+Wrap a single picker to force a theme regardless of the global setting:
+
+```tsx
+<div data-theme="light">
+  <Datetime />   {/* always light, even if page is dark */}
+</div>
+```
+
+### Custom theme
+
+Override any `--rdt-*` token to create your own palette:
+
+```css
+.rdt {
+  --rdt-active-bg:  #9f7aea;                /* purple selections */
+  --rdt-hover-bg:   rgba(159,122,234,0.15); /* matching hover    */
+  --rdt-today-color:#9f7aea;
+}
+```
+
+### CSS custom property reference
+
+| Token | Controls |
+|---|---|
+| `--rdt-bg` | Picker background |
+| `--rdt-color` | All text |
+| `--rdt-border` | Picker border |
+| `--rdt-hover-bg` | Day / month / year hover |
+| `--rdt-active-bg` | Selected date background |
+| `--rdt-active-color` | Selected date text |
+| `--rdt-today-color` | Today indicator dot |
+| `--rdt-disabled-color` | Disabled cell text |
+| `--rdt-muted-color` | Prev / next month cells |
+
+---
+
 ## Acknowledgments & Credits
 
 This project was modernized and is currently maintained by **Felipe Carrillo**.

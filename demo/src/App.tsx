@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import moment from 'moment';
 import 'moment/locale/es';
 import 'moment/locale/fr';
@@ -71,7 +71,13 @@ function CodeSnippet({ code }: { code: string }) {
 
 // ─── App ─────────────────────────────────────────────────────────────────────
 
+type Theme = 'dark' | 'light';
+
 export default function App() {
+  const [theme, setTheme] = useState<Theme>('dark');
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+  useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
+
   // Demo 1 — basic controlled date picker
   const [basicDate, setBasicDate] = useState<moment.Moment | string | undefined>();
 
@@ -168,6 +174,15 @@ export default function App() {
         <a href="#demo-locale">Locale</a>
         <a href="#demo-weekend">Custom Render</a>
         <a href="#demo-ref">Imperative Ref</a>
+        <button
+          id="theme-toggle"
+          className="theme-toggle"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
       </nav>
 
       {/* ── Demo grid ────────────────────────────────────────────────────── */}

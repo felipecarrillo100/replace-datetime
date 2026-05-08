@@ -2,7 +2,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ── Design Tokens ───────────────────────────────────────────────────────── */
-:root {
+
+/* Dark theme (default) */
+html[data-theme="dark"] {
   --bg: #0d0f17;
   --bg-surface: #13161f;
   --bg-card: #1a1e2e;
@@ -22,6 +24,31 @@
   --radius-lg: 20px;
   --shadow: 0 4px 24px rgba(0 0 0 / 0.4);
   --shadow-card: 0 8px 32px rgba(0 0 0 / 0.5);
+  --transition: 0.2s ease;
+}
+
+
+/* Light theme */
+html[data-theme="light"] {
+  --bg: #f0f4f8;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f7fafc;
+  --border: rgba(0 0 0 / 0.09);
+  --border-accent: rgba(49 130 206 / 0.4);
+  --primary: #3182ce;
+  --primary-glow: rgba(49 130 206 / 0.2);
+  --secondary: #805ad5;
+  --accent: #38a169;
+  --danger: #e53e3e;
+  --text: #1a202c;
+  --text-muted: #4a5568;
+  --text-dim: #a0aec0;
+  --radius-sm: 6px;
+  --radius: 12px;
+  --radius-lg: 20px;
+  --shadow: 0 4px 24px rgba(0 0 0 / 0.1);
+  --shadow-card: 0 4px 16px rgba(0 0 0 / 0.08);
   --transition: 0.2s ease;
 }
 
@@ -54,6 +81,72 @@ code {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+}
+
+/* ── Light theme structural overrides ───────────────────────────────────── */
+html[data-theme="light"] .hero {
+  background: linear-gradient(135deg, #ebf4ff 0%, #e8f0fe 40%, #ede9fe 100%);
+}
+html[data-theme="light"] .hero::before {
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(49 130 206 / 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(128 90 213 / 0.08) 0%, transparent 70%);
+}
+html[data-theme="light"] .demo-nav {
+  background: rgba(255 255 255 / 0.88);
+}
+html[data-theme="light"] code {
+  background: rgba(0 0 0 / 0.06);
+  color: #2d3748;
+}
+html[data-theme="light"] .code-snippet {
+  background: #f1f5f9;
+  border-color: rgba(0 0 0 / 0.08);
+}
+html[data-theme="light"] .code-snippet pre {
+  color: #2d3748;
+}
+html[data-theme="light"] .copy-btn {
+  background: rgba(0 0 0 / 0.07);
+  color: #4a5568;
+  border-color: rgba(0 0 0 / 0.12);
+}
+html[data-theme="light"] .copy-btn:hover {
+  background: rgba(0 0 0 / 0.12);
+  color: #1a202c;
+}
+html[data-theme="light"] .output-box {
+  background: #f1f5f9;
+  border-color: rgba(0 0 0 / 0.08);
+}
+html[data-theme="light"] .output-label {
+  color: #a0aec0;
+}
+html[data-theme="light"] .rdt input.form-control {
+  background: #f7fafc;
+  border-color: rgba(0 0 0 / 0.15);
+}
+html[data-theme="light"] .locale-btn {
+  background: rgba(0 0 0 / 0.05);
+  color: #4a5568;
+  border-color: rgba(0 0 0 / 0.12);
+}
+html[data-theme="light"] .locale-btn:hover {
+  background: rgba(0 0 0 / 0.1);
+  color: #1a202c;
+}
+html[data-theme="light"] .btn-secondary {
+  background: rgba(0 0 0 / 0.05);
+  color: #2d3748;
+  border-color: rgba(0 0 0 / 0.12);
+}
+html[data-theme="light"] .btn-sm {
+  background: rgba(0 0 0 / 0.05);
+  color: #2d3748;
+  border-color: rgba(0 0 0 / 0.12);
+}
+html[data-theme="light"] .btn-sm:hover {
+  background: rgba(0 0 0 / 0.1);
 }
 
 /* ── Hero ────────────────────────────────────────────────────────────────── */
@@ -253,6 +346,20 @@ code {
   text-decoration: none;
 }
 
+.theme-toggle {
+  margin-left: auto;
+  padding: 0 16px;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  opacity: 0.8;
+  transition: opacity var(--transition), transform var(--transition);
+  flex-shrink: 0;
+}
+.theme-toggle:hover { opacity: 1; transform: scale(1.15); }
+
 /* ── Demo grid ───────────────────────────────────────────────────────────── */
 .demo-grid {
   flex: 1;
@@ -406,11 +513,13 @@ code {
   color: var(--text-muted);
 }
 
-/* ── react-datetime overrides (dark theme) ───────────────────────────────── */
+/* ── react-datetime overrides ────────────────────────────────────────────── */
+/* All colours come from --rdt-* tokens defined in the theme blocks above */
+
 .rdt input.form-control {
   width: 100%;
   padding: 10px 14px;
-  background: rgba(0 0 0 / 0.35);
+  background: rgba(0 0 0 / 0.15);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
@@ -428,68 +537,28 @@ code {
 .rdt input.form-control::placeholder { color: var(--text-dim); }
 
 .rdtPicker {
-  background: #1c2033 !important;
-  border: 1px solid var(--border-accent) !important;
   border-radius: var(--radius) !important;
   box-shadow: var(--shadow) !important;
   margin-top: 6px !important;
 }
 
-.rdtPicker td, .rdtPicker th {
-  color: var(--text);
-}
-
 .rdtPicker td.rdtDay:hover,
-.rdtPicker td.rdtHour:hover,
-.rdtPicker td.rdtMinute:hover,
-.rdtPicker td.rdtSecond:hover,
-.rdtPicker .rdtTimeToggle:hover {
-  background: rgba(99 179 237 / 0.15) !important;
-  cursor: pointer;
+.rdtPicker td.rdtMonth:hover,
+.rdtPicker td.rdtYear:hover {
   border-radius: var(--radius-sm);
 }
 
 .rdtPicker td.rdtActive,
 .rdtPicker td.rdtActive:hover {
-  background: var(--primary) !important;
-  color: #0d0f17 !important;
   border-radius: var(--radius-sm);
   font-weight: 700;
 }
 
-.rdtPicker td.rdtToday::before {
-  border-bottom-color: var(--primary) !important;
-}
-
-.rdtPicker td.rdtDisabled,
-.rdtPicker td.rdtDisabled:hover {
-  color: var(--text-dim) !important;
-  cursor: not-allowed;
-  background: transparent !important;
-}
-
-.rdtPicker td.rdtOld, .rdtPicker td.rdtNew {
-  color: var(--text-dim) !important;
-}
-
-.rdtSwitch, .rdtPrev, .rdtNext {
-  color: var(--text) !important;
-}
-
-.rdtSwitch:hover, .rdtPrev:hover, .rdtNext:hover {
-  background: rgba(99 179 237 / 0.12) !important;
-}
-
-.rdtPicker tfoot {
-  border-top: 1px solid var(--border) !important;
-}
-
-.rdtPicker .rdtTimeToggle {
-  color: var(--primary) !important;
-}
-
-.rdtCounter .rdtBtn {
-  color: var(--primary) !important;
+/* Static calendar */
+.rdtStatic .rdtPicker {
+  position: relative !important;
+  box-shadow: none !important;
+  margin-top: 0 !important;
 }
 
 /* Custom weekend highlight */
@@ -499,13 +568,6 @@ td.weekend-day {
 }
 td.weekend-day.rdtActive {
   color: #0d0f17 !important;
-}
-
-/* Static calendar */
-.rdtStatic .rdtPicker {
-  position: relative !important;
-  box-shadow: none !important;
-  margin-top: 0 !important;
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */

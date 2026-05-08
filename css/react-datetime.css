@@ -1,7 +1,73 @@
 /*!
- * https://github.com/arqex/react-datetime
+ * https://github.com/felipecarrillo100/replace-datetime
+ *
+ * Theming — CSS custom properties (--rdt-*)
+ * ─────────────────────────────────────────
+ * Light theme is the default.
+ * Dark theme applies automatically when the OS prefers dark.
+ * Override either with data-theme="dark" / data-theme="light" on any
+ * ancestor element (html, body, a wrapper div, or the .rdt itself).
+ *
+ * Custom theme — override any token on .rdt:
+ *   .rdt { --rdt-active-bg: #9f7aea; }
  */
 
+/* ── Light theme (default) ─────────────────────────────────────────────── */
+.rdt {
+  --rdt-bg:            #ffffff;
+  --rdt-color:         #1a202c;
+  --rdt-border:        rgba(0,0,0,0.1);
+  --rdt-hover-bg:      #eeeeee;
+  --rdt-active-bg:     #428bca;
+  --rdt-active-color:  #ffffff;
+  --rdt-disabled-color:#999999;
+  --rdt-today-color:   #428bca;
+  --rdt-muted-color:   #999999;
+}
+
+/* ── Dark theme — OS preference, only when no data-theme is set ────────── */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .rdt {
+    --rdt-bg:            #1c2033;
+    --rdt-color:         #e2e8f0;
+    --rdt-border:        rgba(99,179,237,0.25);
+    --rdt-hover-bg:      rgba(99,179,237,0.15);
+    --rdt-active-bg:     #63b3ed;
+    --rdt-active-color:  #0d0f17;
+    --rdt-disabled-color:#4a5568;
+    --rdt-today-color:   #63b3ed;
+    --rdt-muted-color:   #4a5568;
+  }
+}
+
+/* ── Manual overrides — data-theme wins over media query ──────────────── */
+[data-theme="dark"] .rdt,
+.rdt[data-theme="dark"] {
+  --rdt-bg:            #1c2033;
+  --rdt-color:         #e2e8f0;
+  --rdt-border:        rgba(99,179,237,0.25);
+  --rdt-hover-bg:      rgba(99,179,237,0.15);
+  --rdt-active-bg:     #63b3ed;
+  --rdt-active-color:  #0d0f17;
+  --rdt-disabled-color:#4a5568;
+  --rdt-today-color:   #63b3ed;
+  --rdt-muted-color:   #4a5568;
+}
+
+[data-theme="light"] .rdt,
+.rdt[data-theme="light"] {
+  --rdt-bg:            #ffffff;
+  --rdt-color:         #1a202c;
+  --rdt-border:        rgba(0,0,0,0.1);
+  --rdt-hover-bg:      #eeeeee;
+  --rdt-active-bg:     #428bca;
+  --rdt-active-color:  #ffffff;
+  --rdt-disabled-color:#999999;
+  --rdt-today-color:   #428bca;
+  --rdt-muted-color:   #999999;
+}
+
+/* ── Structure (theme-neutral) ─────────────────────────────────────────── */
 .rdt {
   position: relative;
 }
@@ -12,207 +78,128 @@
   padding: 4px;
   margin-top: 1px;
   z-index: 99999 !important;
-  background: #fff;
+  background: var(--rdt-bg);
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
-  border: 1px solid #f9f9f9;
+  border: 1px solid var(--rdt-border);
 }
-.rdtOpen .rdtPicker {
-  display: block;
-}
-.rdtStatic .rdtPicker {
-  box-shadow: none;
-  position: static;
-}
+.rdtOpen .rdtPicker { display: block; }
+.rdtStatic .rdtPicker { box-shadow: none; position: static; }
 
-.rdtPicker .rdtTimeToggle {
-  text-align: center;
-}
+.rdtPicker .rdtTimeToggle { text-align: center; }
 
-.rdtPicker table {
-  width: 100%;
-  margin: 0;
-}
+.rdtPicker table { width: 100%; margin: 0; }
 .rdtPicker td,
 .rdtPicker th {
   text-align: center;
   height: 28px;
+  color: var(--rdt-color);
 }
-.rdtPicker td {
-  cursor: pointer;
-}
+.rdtPicker td { cursor: pointer; }
+
 .rdtPicker td.rdtDay:hover,
 .rdtPicker td.rdtHour:hover,
 .rdtPicker td.rdtMinute:hover,
 .rdtPicker td.rdtSecond:hover,
+.rdtPicker td.rdtMonth:hover,
+.rdtPicker td.rdtYear:hover,
 .rdtPicker .rdtTimeToggle:hover {
-  background: #eeeeee;
+  background: var(--rdt-hover-bg);
   cursor: pointer;
 }
+
 .rdtPicker td.rdtOld,
-.rdtPicker td.rdtNew {
-  color: #999999;
-}
-.rdtPicker td.rdtToday {
-  position: relative;
-}
+.rdtPicker td.rdtNew { color: var(--rdt-muted-color); }
+
+.rdtPicker td.rdtToday { position: relative; }
 .rdtPicker td.rdtToday:before {
   content: '';
   display: inline-block;
   border-left: 7px solid transparent;
-  border-bottom: 7px solid #428bca;
-  border-top-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 7px solid var(--rdt-today-color);
+  border-top-color: rgba(0,0,0,0.2);
   position: absolute;
   bottom: 4px;
   right: 4px;
 }
+
 .rdtPicker td.rdtActive,
 .rdtPicker td.rdtActive:hover {
-  background-color: #428bca;
-  color: #fff;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  background-color: var(--rdt-active-bg);
+  color: var(--rdt-active-color);
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.25);
 }
-.rdtPicker td.rdtActive.rdtToday:before {
-  border-bottom-color: #fff;
-}
+.rdtPicker td.rdtActive.rdtToday:before { border-bottom-color: #fff; }
+
 .rdtPicker td.rdtDisabled,
 .rdtPicker td.rdtDisabled:hover {
   background: none;
-  color: #999999;
+  color: var(--rdt-disabled-color);
   cursor: not-allowed;
 }
 
-.rdtPicker td span.rdtOld {
-  color: #999999;
-}
+.rdtPicker td span.rdtOld { color: var(--rdt-muted-color); }
 .rdtPicker td span.rdtDisabled,
 .rdtPicker td span.rdtDisabled:hover {
   background: none;
-  color: #999999;
+  color: var(--rdt-disabled-color);
   cursor: not-allowed;
 }
-.rdtPicker th {
-  border-bottom: 1px solid #f9f9f9;
-}
-.rdtPicker .dow {
-  width: 14.2857%;
-  border-bottom: none;
-  cursor: default;
-}
-.rdtPicker th.rdtSwitch {
-  width: 100px;
-}
+
+.rdtPicker th { border-bottom: 1px solid var(--rdt-border); color: var(--rdt-color); }
+.rdtPicker .dow { width: 14.2857%; border-bottom: none; cursor: default; }
+.rdtPicker th.rdtSwitch { width: 100px; }
 .rdtPicker th.rdtNext,
-.rdtPicker th.rdtPrev {
-  font-size: 21px;
-  vertical-align: top;
-}
+.rdtPicker th.rdtPrev { font-size: 21px; vertical-align: top; }
 
 .rdtPrev span,
 .rdtNext span {
   display: block;
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none;   /* Chrome/Safari/Opera */
-  -khtml-user-select: none;    /* Konqueror */
-  -moz-user-select: none;      /* Firefox */
-  -ms-user-select: none;       /* Internet Explorer/Edge */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
 }
 
 .rdtPicker th.rdtDisabled,
 .rdtPicker th.rdtDisabled:hover {
   background: none;
-  color: #999999;
+  color: var(--rdt-disabled-color);
   cursor: not-allowed;
 }
-.rdtPicker thead tr:first-of-type th {
-  cursor: pointer;
-}
-.rdtPicker thead tr:first-of-type th:hover {
-  background: #eeeeee;
-}
+.rdtPicker thead tr:first-of-type th { cursor: pointer; }
+.rdtPicker thead tr:first-of-type th:hover { background: var(--rdt-hover-bg); }
+.rdtPicker tfoot { border-top: 1px solid var(--rdt-border); }
 
-.rdtPicker tfoot {
-  border-top: 1px solid #f9f9f9;
-}
-
-.rdtPicker button {
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-.rdtPicker button:hover {
-  background-color: #eee;
-}
-
-.rdtPicker thead button {
-  width: 100%;
-  height: 100%;
-}
+.rdtPicker button { border: none; background: none; cursor: pointer; }
+.rdtPicker button:hover { background-color: var(--rdt-hover-bg); }
+.rdtPicker thead button { width: 100%; height: 100%; }
 
 td.rdtMonth,
-td.rdtYear {
-  height: 50px;
-  width: 25%;
-  cursor: pointer;
-}
-td.rdtMonth:hover,
-td.rdtYear:hover {
-  background: #eee;
-}
+td.rdtYear { height: 50px; width: 25%; cursor: pointer; }
 
-.rdtCounters {
-  display: inline-block;
-}
-
-.rdtCounters > div {
-  float: left;
-}
-
-.rdtCounter {
-  height: 100px;
-}
-
-.rdtCounter {
-  width: 40px;
-}
-
-.rdtCounterSeparator {
-  line-height: 100px;
-}
+.rdtCounters { display: inline-block; }
+.rdtCounters > div { float: left; }
+.rdtCounter { height: 100px; width: 40px; }
+.rdtCounterSeparator { line-height: 100px; }
 
 .rdtCounter .rdtBtn {
   height: 40%;
   line-height: 40px;
   cursor: pointer;
   display: block;
-
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none;   /* Chrome/Safari/Opera */
-  -khtml-user-select: none;    /* Konqueror */
-  -moz-user-select: none;      /* Firefox */
-  -ms-user-select: none;       /* Internet Explorer/Edge */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
 }
-.rdtCounter .rdtBtn:hover {
-  background: #eee;
-}
-.rdtCounter .rdtCount {
-  height: 20%;
-  font-size: 1.2em;
-}
+.rdtCounter .rdtBtn:hover { background: var(--rdt-hover-bg); }
+.rdtCounter .rdtCount { height: 20%; font-size: 1.2em; }
 
-.rdtMilli {
-  vertical-align: middle;
-  padding-left: 8px;
-  width: 48px;
-}
+.rdtMilli { vertical-align: middle; padding-left: 8px; width: 48px; }
+.rdtMilli input { width: 100%; font-size: 1.2em; margin-top: 37px; }
 
-.rdtMilli input {
-  width: 100%;
-  font-size: 1.2em;
-  margin-top: 37px;
-}
-
-.rdtTime td {
-  cursor: default;
-}
+.rdtTime td { cursor: default; }
