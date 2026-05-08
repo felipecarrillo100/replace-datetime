@@ -1,6 +1,6 @@
 {
   "name": "replace-datetime",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "A lightweight but complete datetime picker component compatible with React 18/19",
   "homepage": "https://github.com/felipecarrillo100/replace-datetime",
   "repository": {

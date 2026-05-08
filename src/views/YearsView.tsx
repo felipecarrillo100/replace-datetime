@@ -17,7 +17,7 @@ export default function YearsView({
 	viewDate,
 	selectedDate,
 	isValidDate,
-	renderYear = (props, year) => <td {...props}>{year}</td>,
+	renderYear = (props, year) => <td key={year} {...props}>{year}</td>,
 	updateDate,
 	navigate,
 	showView
@@ -62,13 +62,14 @@ export default function YearsView({
 			className += ' rdtActive';
 		}
 
-		const props = { key: year, className, 'data-value': year, onClick };
+		const props = { className, 'data-value': year, onClick };
 
-		return renderYear(
+		const element = renderYear(
 			props,
 			year,
 			selectedDate ? selectedDate.clone() : undefined
 		);
+		return React.isValidElement(element) ? React.cloneElement(element, { key: year }) : element;
 	};
 
 	const renderNavigation = () => {

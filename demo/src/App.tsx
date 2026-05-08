@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import moment from 'moment';
 import 'moment/locale/es';
 import 'moment/locale/fr';
-import Datetime, { DateTimeProps } from 'replace-datetime';
+import Datetime, { DateTimeProps, DatetimeHandle } from 'replace-datetime';
 import 'replace-datetime/css/react-datetime.css';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -93,7 +93,7 @@ export default function App() {
   const [weekendDate, setWeekendDate] = useState<moment.Moment | string | undefined>();
 
   // Demo 8 — imperative ref
-  const dtRef = useRef<any>(null);
+  const dtRef = useRef<DatetimeHandle>(null);
   const [refDate, setRefDate] = useState<moment.Moment | string | undefined>();
   const jumpToToday = () => dtRef.current?.setViewDate(moment());
   const jumpToNextYear = () => dtRef.current?.setViewDate(moment().add(1, 'year'));

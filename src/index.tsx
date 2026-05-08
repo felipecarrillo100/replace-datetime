@@ -42,6 +42,57 @@ const viewModes: Record<string, ViewMode> = {
 };
 
 /**
+ * Imperative handle exposed by the {@link Datetime} component when used with a `ref`.
+ *
+ * Attach a React ref to the component to access these methods programmatically:
+ *
+ * @example
+ * ```tsx
+ * const ref = useRef<DatetimeHandle>(null);
+ *
+ * // Navigate the calendar to a specific date
+ * ref.current?.setViewDate(moment('2025-06-01'));
+ *
+ * // Switch the active view
+ * ref.current?.navigate('years');
+ *
+ * // Read internal state
+ * console.log(ref.current?.state.selectedDate);
+ *
+ * return <Datetime ref={ref} />;
+ * ```
+ *
+ * @public
+ */
+export interface DatetimeHandle {
+	/**
+	 * Navigate the calendar to the given date without changing the selected value.
+	 * @param date - A `moment` object, native `Date`, or date string.
+	 */
+	setViewDate: (date: moment.Moment | Date | string) => void;
+
+	/**
+	 * Programmatically switch the active calendar view.
+	 * @param mode - The {@link ViewMode} to display.
+	 */
+	navigate: (mode: ViewMode) => void;
+
+	/** Read-only snapshot of the component's current internal state. */
+	state: {
+		/** Whether the calendar overlay is currently open. */
+		open: boolean;
+		/** The view currently rendered inside the calendar. */
+		currentView: ViewMode;
+		/** The date the calendar is currently navigated to. */
+		viewDate: moment.Moment;
+		/** The selected date, or `undefined` if nothing is selected. */
+		selectedDate: moment.Moment | undefined;
+		/** The current raw string value of the text input. */
+		inputValue: string;
+	};
+}
+
+/**
  * Props accepted by the {@link Datetime} component.
  *
  * Every prop is optional; sensible defaults are applied for all of them.
@@ -49,6 +100,7 @@ const viewModes: Record<string, ViewMode> = {
  * @public
  */
 export interface DateTimeProps {
+
 	/**
 	 * The currently selected date/time value (controlled mode).
 	 * Accepts a `moment` object, a native `Date`, or a date string.
@@ -400,7 +452,7 @@ const nofn = () => {};
  *
  * @public
  */
-const Datetime = forwardRef((props: DateTimeProps, ref) => {
+const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 	const {
 		input = true,
 		dateFormat = true,
@@ -528,8 +580,8 @@ const Datetime = forwardRef((props: DateTimeProps, ref) => {
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	// Imperative Handle
-	useImperativeHandle(ref, () => ({
-		setViewDate: (date: any) => {
+	useImperativeHandle(ref, (): DatetimeHandle => ({
+		setViewDate: (date: moment.Moment | Date | string) => {
 			const vd = parseDate(date, getFormat('datetime'));
 			if (vd && vd.isValid()) setViewDateState(vd);
 		},

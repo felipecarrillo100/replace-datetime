@@ -90,8 +90,8 @@ export default function DaysView({
 	};
 
 	const renderSingleDay = (date: moment.Moment, startOfMonth: moment.Moment, endOfMonth: moment.Moment) => {
+		const key = date.format('M_D');
 		const dayProps: any = {
-			key: date.format('M_D'),
 			'data-value': date.date(),
 			'data-month': date.month(),
 			'data-year': date.year()
@@ -120,9 +120,10 @@ export default function DaysView({
 
 		dayProps.className = className;
 
-		return renderDay(
+		const element = renderDay(
 			dayProps, date.clone(), selectedDate && selectedDate.clone()
 		);
+		return React.isValidElement(element) ? React.cloneElement(element, { key }) : element;
 	};
 
 	const renderFooter = () => {

@@ -73,19 +73,20 @@ export default function MonthsView({
 			className += ' rdtActive';
 		}
 
-		const props = { key: month, className, 'data-value': month, onClick };
+		const props = { className, 'data-value': month, onClick };
 
 		if (renderMonth) {
-			return renderMonth(
+			const element = renderMonth(
 				props,
 				month,
 				viewDate.year(),
 				selectedDate ? selectedDate.clone() : undefined
 			);
+			return React.isValidElement(element) ? React.cloneElement(element, { key: month }) : element;
 		}
 
 		return (
-			<td {...props}>
+			<td key={month} {...props}>
 				{getMonthText(month)}
 			</td>
 		);
