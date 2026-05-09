@@ -2,7 +2,7 @@
 
 A lightweight but complete datetime picker component for React, fully compatible with **React 18 and 19**.
 
-This project is a modernized fork of the original `react-datetime` library, rewritten in TypeScript with functional components and modern React hooks.
+This project is a modernized, TypeScript-native fork of the original [react-datetime](https://github.com/YouCanBookMe/react-datetime) library, originally created by [Javier Marquez](https://github.com/arqex).
 
 📅 [Try the Live Demo](https://felipecarrillo100.github.io/replace-datetime/demo/) — All picker modes, fully interactive.
 
@@ -210,10 +210,10 @@ To prevent this "hijacking":
 
 This project was modernized and is currently maintained by **Felipe Carrillo**.
 
-We would like to express our deepest gratitude to the original authors and contributors of `react-datetime`, particularly **Javier Marquez**, for creating such a foundational component for the React community. This fork aims to carry that legacy forward into the modern React era.
+We would like to express our deepest gratitude to the original authors and contributors of [react-datetime](https://github.com/YouCanBookMe/react-datetime), particularly **Javier Marquez**, for creating such a foundational component for the React community. This fork aims to carry that legacy forward into the modern React era.
 
 Special thanks to [YouCanBook.me](https://youcanbook.me) for their long-term sponsorship of the original project.
 
 ## License
 
-[MIT Licensed](LICENSE.md)
+[MIT Licensed](LICENSE.txt)
