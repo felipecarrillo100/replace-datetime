@@ -378,7 +378,7 @@ html[data-theme="light"] .btn-sm:hover {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow: visible;
   transition: border-color var(--transition), box-shadow var(--transition);
   box-shadow: var(--shadow-card);
 }
@@ -540,6 +540,12 @@ html[data-theme="light"] .btn-sm:hover {
   border-radius: var(--radius) !important;
   box-shadow: var(--shadow) !important;
   margin-top: 6px !important;
+  z-index: 999 !important;
+}
+
+.rdtOpen {
+  position: relative;
+  z-index: 100;
 }
 
 .rdtPicker td.rdtDay:hover,

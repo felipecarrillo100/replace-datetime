@@ -172,6 +172,40 @@ Override any `--rdt-*` token to create your own palette:
 
 ---
 
+## Troubleshooting & Best Practices
+
+### Clipping and Overflow Issues
+The datetime picker is an absolutely positioned element. If any parent container (such as a Card, Grid cell, or Modal) has `overflow: hidden`, the picker will be cut off when it opens.
+
+**Solution:**
+- Ensure the parent container has `overflow: visible`.
+- Use the `.rdtOpen` class to lift the picker's stacking context if it is tucked behind other elements:
+  ```css
+  /* Ensure the active picker floats above everything else */
+  .rdtOpen {
+    z-index: 100;
+    position: relative;
+  }
+  ```
+
+### Moment.js and Global Locales
+This library relies on Moment.js for all date manipulation and localization.
+
+**⚠️ Warning on Global Side-Effects:**
+Importing a locale file in Moment (e.g., `import 'moment/locale/de'`) automatically switches the global locale to that language. If your application imports multiple locales, the last one imported will become the default for all pickers.
+
+To prevent this "hijacking":
+1. **Explicitly reset the global locale** in your main entry file:
+   ```tsx
+   import 'moment/locale/fr';
+   import 'moment/locale/es';
+   import moment from 'moment';
+   moment.locale('en'); // Reset to your preferred default
+   ```
+2. **Use the `locale` prop** on the component instance to set the language for a specific picker without affecting the rest of your app.
+
+---
+
 ## Acknowledgments & Credits
 
 This project was modernized and is currently maintained by **Felipe Carrillo**.

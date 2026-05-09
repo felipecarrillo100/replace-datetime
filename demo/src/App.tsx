@@ -4,6 +4,9 @@ import 'moment/locale/es';
 import 'moment/locale/fr';
 import 'moment/locale/de';
 
+// Reset global locale to English so that imports don't hijack the default state
+moment.locale('en');
+
 import Datetime, { DateTimeProps, DatetimeHandle } from 'replace-datetime';
 import 'replace-datetime/css/react-datetime.css';
 
@@ -103,6 +106,7 @@ export default function App() {
   // Demo 8 — imperative ref
   const dtRef = useRef<DatetimeHandle>(null);
   const [refDate, setRefDate] = useState<moment.Moment | string | undefined>();
+  const [defaultDatetime, setDefaultDatetime] = useState<moment.Moment | string | undefined>();
   const jumpToToday = () => dtRef.current?.setViewDate(moment());
   const jumpToNextYear = () => dtRef.current?.setViewDate(moment().add(1, 'year'));
 
@@ -166,6 +170,7 @@ export default function App() {
 
       {/* ── Nav ──────────────────────────────────────────────────────────── */}
       <nav className="demo-nav" aria-label="Demo sections">
+        <a href="#demo-default">Standard</a>
         <a href="#demo-basic">Basic</a>
         <a href="#demo-time">Time Only</a>
         <a href="#demo-datetime">Date + Time</a>
@@ -187,6 +192,23 @@ export default function App() {
 
       {/* ── Demo grid ────────────────────────────────────────────────────── */}
       <main className="demo-grid">
+
+        {/* 0 · Default Datetime */}
+        <Card
+          id="demo-default"
+          title="Standard DateTime"
+          description="The default behavior — displays both the calendar and time spinner together using locale-aware formats."
+          badge="Full"
+          output={fmtDisplay(defaultDatetime)}
+        >
+          <Datetime
+            onChange={setDefaultDatetime}
+            inputProps={{ id: 'input-default', placeholder: 'Pick date and time…' }}
+          />
+          <CodeSnippet code={`<Datetime
+  onChange={(v) => setValue(v)}
+/>`} />
+        </Card>
 
         {/* 1 · Basic date picker */}
         <Card
