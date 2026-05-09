@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   minify: true,
-  external: ['react', 'react-dom', 'moment', 'moment-timezone', 'prop-types', 'react-onclickoutside'],
+  external: ['react', 'react-dom', 'moment', 'moment-timezone', 'react-onclickoutside'],
   sourcemap: true,
   injectStyle: false,
 });
