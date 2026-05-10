@@ -75,32 +75,32 @@ export const isTimeView = (datetime: any) => {
 
 export const increaseHour = (datetime: any) => {
 	const btns = datetime.container.querySelectorAll('.rdtCounter .rdtBtn');
-	if (btns[0]) fireEvent.mouseDown(btns[0]);
+	if (btns[0]) fireEvent.pointerDown(btns[0]);
 };
 
 export const decreaseHour = (datetime: any) => {
 	const btns = datetime.container.querySelectorAll('.rdtCounter .rdtBtn');
-	if (btns[1]) fireEvent.mouseDown(btns[1]);
+	if (btns[1]) fireEvent.pointerDown(btns[1]);
 };
 
 export const increaseMinute = (datetime: any) => {
 	const btns = datetime.container.querySelectorAll('.rdtCounter .rdtBtn');
-	if (btns[2]) fireEvent.mouseDown(btns[2]);
+	if (btns[2]) fireEvent.pointerDown(btns[2]);
 };
 
 export const decreaseMinute = (datetime: any) => {
 	const btns = datetime.container.querySelectorAll('.rdtCounter .rdtBtn');
-	if (btns[3]) fireEvent.mouseDown(btns[3]);
+	if (btns[3]) fireEvent.pointerDown(btns[3]);
 };
 
 export const increaseSecond = (datetime: any) => {
 	const btns = datetime.container.querySelectorAll('.rdtCounter .rdtBtn');
-	if (btns[4]) fireEvent.mouseDown(btns[4]);
+	if (btns[4]) fireEvent.pointerDown(btns[4]);
 };
 
 export const decreaseSecond = (datetime: any) => {
 	const btns = datetime.container.querySelectorAll('.rdtCounter .rdtBtn');
-	if (btns[5]) fireEvent.mouseDown(btns[5]);
+	if (btns[5]) fireEvent.pointerDown(btns[5]);
 };
 
 export const getNthDay = (datetime: any, n: number) => {

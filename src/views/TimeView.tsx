@@ -72,8 +72,8 @@ export default function TimeView({
 			clearTimeout(timerRef.current);
 			clearInterval(increaseTimerRef.current);
 			if (mouseUpListenerRef.current) {
-				document.body.removeEventListener('mouseup', mouseUpListenerRef.current);
-				document.body.removeEventListener('touchend', mouseUpListenerRef.current);
+				document.body.removeEventListener('pointerup', mouseUpListenerRef.current);
+				document.body.removeEventListener('pointercancel', mouseUpListenerRef.current);
 			}
 		};
 	}, []);
@@ -119,8 +119,8 @@ export default function TimeView({
 		setTime('hours', hours);
 	};
 
-	const onStartClicking = (e: React.MouseEvent | React.TouchEvent, action: 'increase' | 'decrease', type: string) => {
-		if ((e as React.MouseEvent).button && (e as React.MouseEvent).button !== 0) return;
+	const onStartClicking = (e: React.PointerEvent, action: 'increase' | 'decrease', type: string) => {
+		if (e.button && e.button !== 0) return;
 		if (type === 'ampm') return toggleDayPart();
 
 		const val = action === 'increase' ? increase(type) : decrease(type);
@@ -137,13 +137,13 @@ export default function TimeView({
 			clearTimeout(timerRef.current);
 			clearInterval(increaseTimerRef.current);
 			setTime(type, parseInt(stateRef.current[type as keyof typeof state] as string, 10));
-			document.body.removeEventListener('mouseup', mouseUpListenerRef.current);
-			document.body.removeEventListener('touchend', mouseUpListenerRef.current);
+			document.body.removeEventListener('pointerup', mouseUpListenerRef.current);
+			document.body.removeEventListener('pointercancel', mouseUpListenerRef.current);
 			mouseUpListenerRef.current = null;
 		};
 
-		document.body.addEventListener('mouseup', mouseUpListenerRef.current);
-		document.body.addEventListener('touchend', mouseUpListenerRef.current);
+		document.body.addEventListener('pointerup', mouseUpListenerRef.current);
+		document.body.addEventListener('pointercancel', mouseUpListenerRef.current);
 	};
 
 	const renderCounter = (type: string, value: string) => {
@@ -160,9 +160,9 @@ export default function TimeView({
 
 		return (
 			<div key={type} className="rdtCounter">
-				<span className="rdtBtn" onMouseDown={e => onStartClicking(e, 'increase', type)} onTouchStart={e => onStartClicking(e, 'increase', type)}>▲</span>
+				<span className="rdtBtn" onPointerDown={e => onStartClicking(e, 'increase', type)}>▲</span>
 				<div className="rdtCount">{displayValue}</div>
-				<span className="rdtBtn" onMouseDown={e => onStartClicking(e, 'decrease', type)} onTouchStart={e => onStartClicking(e, 'decrease', type)}>▼</span>
+				<span className="rdtBtn" onPointerDown={e => onStartClicking(e, 'decrease', type)}>▼</span>
 			</div>
 		);
 	};
