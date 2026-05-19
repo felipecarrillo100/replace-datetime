@@ -1,5 +1,5 @@
 import React from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 /**
  * @packageDocumentation
@@ -40,7 +40,7 @@ type ViewMode = 'years' | 'months' | 'days' | 'time';
  * const ref = useRef<DatetimeHandle>(null);
  *
  * // Navigate the calendar to a specific date
- * ref.current?.setViewDate(moment('2025-06-01'));
+ * ref.current?.setViewDate(dayjs('2025-06-01'));
  *
  * // Switch the active view
  * ref.current?.navigate('years');
@@ -56,9 +56,9 @@ type ViewMode = 'years' | 'months' | 'days' | 'time';
 interface DatetimeHandle {
     /**
      * Navigate the calendar to the given date without changing the selected value.
-     * @param date - A `moment` object, native `Date`, or date string.
+     * @param date - A `dayjs` object, native `Date`, or date string.
      */
-    setViewDate: (date: moment.Moment | Date | string) => void;
+    setViewDate: (date: dayjs.Dayjs | Date | string) => void;
     /**
      * Programmatically switch the active calendar view.
      * @param mode - The {@link ViewMode} to display.
@@ -71,9 +71,9 @@ interface DatetimeHandle {
         /** The view currently rendered inside the calendar. */
         currentView: ViewMode;
         /** The date the calendar is currently navigated to. */
-        viewDate: moment.Moment;
+        viewDate: dayjs.Dayjs;
         /** The selected date, or `undefined` if nothing is selected. */
-        selectedDate: moment.Moment | undefined;
+        selectedDate: dayjs.Dayjs | undefined;
         /** The current raw string value of the text input. */
         inputValue: string;
     };
@@ -88,21 +88,21 @@ interface DatetimeHandle {
 interface DateTimeProps {
     /**
      * The currently selected date/time value (controlled mode).
-     * Accepts a `moment` object, a native `Date`, or a date string.
+     * Accepts a `dayjs` object, a native `Date`, or a date string.
      * When provided the picker becomes a controlled component.
      */
-    value?: moment.Moment | Date | string;
+    value?: dayjs.Dayjs | Date | string;
     /**
      * Initial value for the picker in uncontrolled mode.
-     * Accepts a `moment` object, a native `Date`, or a date string.
+     * Accepts a `dayjs` object, a native `Date`, or a date string.
      */
-    initialValue?: moment.Moment | Date | string;
+    initialValue?: dayjs.Dayjs | Date | string;
     /**
      * The date/time that the calendar initially navigates to (i.e. the month
      * shown when the picker first opens). Defaults to `value`, `initialValue`,
      * or today if neither is set.
      */
-    initialViewDate?: moment.Moment | Date | string;
+    initialViewDate?: dayjs.Dayjs | Date | string;
     /**
      * Which calendar view to show first.
      * @defaultValue Determined automatically from `dateFormat`.
@@ -114,23 +114,23 @@ interface DateTimeProps {
      * Called when the calendar/time-picker overlay is closed.
      * @param value - The currently selected value at close time.
      */
-    onClose?: (value: moment.Moment | string) => void;
+    onClose?: (value: dayjs.Dayjs | string) => void;
     /**
      * Called every time the user changes the selected value, whether by
      * clicking a day/month/year, adjusting the time spinner, or typing in
      * the input field.
      *
-     * @param value - A valid `moment` object when the input is parseable,
+     * @param value - A valid `dayjs` object when the input is parseable,
      *   or the raw string when it cannot be parsed.
      *
      * @example
      * ```tsx
      * <Datetime onChange={(v) => {
-     *   if (moment.isMoment(v)) console.log(v.toISOString());
+     *   if (dayjs.isDayjs(v)) console.log(v.toISOString());
      * }} />
      * ```
      */
-    onChange?: (value: moment.Moment | string) => void;
+    onChange?: (value: dayjs.Dayjs | string) => void;
     /**
      * Called when the user navigates to a different view (e.g. from days to months).
      * @param view - The new active view mode.
@@ -142,10 +142,10 @@ interface DateTimeProps {
      *
      * @param nextView - The view the user is trying to navigate to.
      * @param currentView - The view currently displayed.
-     * @param viewDate - The `moment` date currently in focus.
+     * @param viewDate - The `dayjs` date currently in focus.
      * @returns The `ViewMode` that should actually be shown.
      */
-    onBeforeNavigate?: (nextView: ViewMode, currentView: ViewMode, viewDate: moment.Moment) => ViewMode;
+    onBeforeNavigate?: (nextView: ViewMode, currentView: ViewMode, viewDate: dayjs.Dayjs) => ViewMode;
     /**
      * Called when the user clicks the "previous" navigation arrow.
      * @param amount - Number of units navigated back.
@@ -165,7 +165,7 @@ interface DateTimeProps {
      */
     updateOnView?: ViewMode;
     /**
-     * A [moment locale](https://momentjs.com/docs/#/i18n/) identifier string
+     * A [dayjs locale](https://day.js.org/docs/en/i18n/i18n) identifier string
      * (e.g. `'es'`, `'fr'`, `'de'`). Applied to month/day names and the default
      * date/time format.
      *
@@ -181,8 +181,8 @@ interface DateTimeProps {
      */
     utc?: boolean;
     /**
-     * A [moment-timezone](https://momentjs.com/timezone/) zone name
-     * (e.g. `'America/New_York'`). Requires `moment-timezone` to be installed.
+     * A timezone zone name
+     * (e.g. `'America/New_York'`).
      */
     displayTimeZone?: string;
     /**
@@ -194,7 +194,7 @@ interface DateTimeProps {
      */
     input?: boolean;
     /**
-     * Moment.js format string for the date portion (e.g. `'YYYY-MM-DD'`).
+     * Day.js format string for the date portion (e.g. `'YYYY-MM-DD'`).
      * Pass `false` to hide the date part entirely (time-only picker).
      * Pass `true` to use the locale default.
      *
@@ -207,7 +207,7 @@ interface DateTimeProps {
      */
     dateFormat?: string | boolean;
     /**
-     * Moment.js format string for the time portion (e.g. `'HH:mm:ss'`).
+     * Day.js format string for the time portion (e.g. `'HH:mm:ss'`).
      * Pass `false` to hide the time part entirely (date-only picker).
      * Pass `true` to use the locale default.
      *
@@ -243,15 +243,15 @@ interface DateTimeProps {
     /**
      * Return `true` for dates that should be selectable, `false` to disable them.
      *
-     * @param date - The `moment` date being evaluated.
+     * @param date - The `dayjs` date being evaluated.
      * @returns `true` if the date is valid/selectable.
      *
      * @example Disable past dates
      * ```tsx
-     * <Datetime isValidDate={(d) => d.isSameOrAfter(moment(), 'day')} />
+     * <Datetime isValidDate={(d) => d.isSameOrAfter(dayjs(), 'day')} />
      * ```
      */
-    isValidDate?: (date: moment.Moment) => boolean;
+    isValidDate?: (date: dayjs.Dayjs) => boolean;
     /**
      * Programmatically control whether the calendar overlay is open.
      * When set, the component becomes fully controlled — use `onOpen`/`onClose`
@@ -331,7 +331,7 @@ interface DateTimeProps {
      * Custom render function for each day cell in the calendar grid.
      *
      * @param props - Props to spread on the `<td>` element (includes click handlers).
-     * @param date - The `moment` date for this cell.
+     * @param date - The `dayjs` date for this cell.
      * @param selectedDate - The currently selected date, if any.
      *
      * @example Highlight weekends
@@ -345,7 +345,7 @@ interface DateTimeProps {
      * />
      * ```
      */
-    renderDay?: (props: any, date: moment.Moment, selectedDate?: moment.Moment) => React.ReactNode;
+    renderDay?: (props: any, date: dayjs.Dayjs, selectedDate?: dayjs.Dayjs) => React.ReactNode;
     /**
      * Custom render function for each month cell in the month-selection view.
      *
@@ -354,7 +354,7 @@ interface DateTimeProps {
      * @param year - Full four-digit year.
      * @param selectedDate - The currently selected date, if any.
      */
-    renderMonth?: (props: any, month: number, year: number, selectedDate?: moment.Moment) => React.ReactNode;
+    renderMonth?: (props: any, month: number, year: number, selectedDate?: dayjs.Dayjs) => React.ReactNode;
     /**
      * Custom render function for each year cell in the year-selection view.
      *
@@ -362,7 +362,7 @@ interface DateTimeProps {
      * @param year - Full four-digit year.
      * @param selectedDate - The currently selected date, if any.
      */
-    renderYear?: (props: any, year: number, selectedDate?: moment.Moment) => React.ReactNode;
+    renderYear?: (props: any, year: number, selectedDate?: dayjs.Dayjs) => React.ReactNode;
 }
 /**
  * A fully-featured, accessible datetime picker component for React 18 and 19.

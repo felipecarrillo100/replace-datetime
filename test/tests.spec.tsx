@@ -1,11 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import React from 'react';
-import moment from 'moment';
-import 'moment/locale/nl';
-import 'moment/locale/sv';
+import { describe, it, expect, vi } from 'vitest';
+import dayjs from 'dayjs';
 import utils from './testUtils';
 
-moment.locale('en');
+dayjs.locale('en');
 
 describe('Datetime', () => {
 	it('create component', () => {
@@ -71,7 +68,7 @@ describe('Datetime', () => {
 		const component = utils.createDatetime({
 			initialViewMode: 'months',
 			value: new Date(2018, 10, 10),
-			isValidDate: (current: any) => current.isBefore(moment(dateBefore, 'YYYY-MM-DD'))
+			isValidDate: (current: any) => current.isBefore(dayjs(dateBefore, 'YYYY-MM-DD'))
 		});
 
 		expect(utils.isMonthView(component)).toBeTruthy();
@@ -289,7 +286,7 @@ describe('Datetime', () => {
 	});
 
 	it('sets CSS class on today date', () => {
-		const specificDate = moment(),
+		const specificDate = dayjs(),
 			day = specificDate.date(),
 			component = utils.createDatetime({ initialValue: specificDate })
 		;
@@ -307,14 +304,14 @@ describe('Datetime', () => {
 
 		it('dateFormat', () => {
 			const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-				mDate = moment(date),
+				mDate = dayjs(date),
 				component = utils.createDatetime({ value: date, dateFormat: 'M&D' });
 			expect(utils.getInputValue(component)).toEqual(mDate.format('M&D LT'));
 		});
 
 		it('dateFormat=false', () => {
 			const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-				mDate = moment(date),
+				mDate = dayjs(date),
 				component = utils.createDatetime({ value: date, dateFormat: false });
 			expect(utils.getInputValue(component)).toEqual(mDate.format('LT'));
 			// Make sure time view is active
@@ -325,7 +322,7 @@ describe('Datetime', () => {
 
 		it('timeFormat', () => {
 			const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-				mDate = moment(date),
+				mDate = dayjs(date),
 				format = 'HH:mm:ss:SSS',
 				component = utils.createDatetime({ value: date, timeFormat: format });
 			expect(utils.getInputValue(component)).toEqual(mDate.format('L ' + format));
@@ -333,7 +330,7 @@ describe('Datetime', () => {
 
 		it('timeFormat=false', () => {
 			const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-				mDate = moment(date),
+				mDate = dayjs(date),
 				component = utils.createDatetime({ value: date, timeFormat: false });
 			expect(utils.getInputValue(component)).toEqual(mDate.format('L'));
 			// Make sure day view is active
@@ -408,15 +405,15 @@ describe('Datetime', () => {
 		describe('initialValue of type', () => {
 			it('date', () => {
 				const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-					momentDate = moment(date),
+					momentDate = dayjs(date),
 					strDate = momentDate.format('L') + ' ' + momentDate.format('LT'),
 					component = utils.createDatetime({ initialValue: date });
 				expect(utils.getInputValue(component)).toEqual(strDate);
 			});
 
-			it('moment', () => {
+			it('dayjs', () => {
 				const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-					momentDate = moment(date),
+					momentDate = dayjs(date),
 					strDate = momentDate.format('L') + ' ' + momentDate.format('LT'),
 					component = utils.createDatetime({ initialValue: momentDate });
 				expect(utils.getInputValue(component)).toEqual(strDate);
@@ -424,7 +421,7 @@ describe('Datetime', () => {
 
 			it('string', () => {
 				const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-					momentDate = moment(date),
+					momentDate = dayjs(date),
 					strDate = momentDate.format('L') + ' ' + momentDate.format('LT'),
 					component = utils.createDatetime({ initialValue: strDate });
 				expect(utils.getInputValue(component)).toEqual(strDate);
@@ -469,7 +466,7 @@ describe('Datetime', () => {
 
 			it('UTC -> value should change format (true->false)', () => {
 				const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-					momentDate = moment(date),
+					momentDate = dayjs(date),
 					component = utils.createDatetime({ value: momentDate, utc: true });
 
 				const valueBefore = utils.getInputValue(component);
@@ -481,7 +478,7 @@ describe('Datetime', () => {
 
 			it('UTC -> value should change format (false->true)', () => {
 				const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-					momentDate = moment(date),
+					momentDate = dayjs(date),
 					component = utils.createDatetime({ value: momentDate, utc: false });
 
 				const valueBefore = utils.getInputValue(component);
@@ -616,7 +613,7 @@ describe('Datetime', () => {
 			});
 
 			it('when onBeforeNavigate is defined', () => {
-				const date = moment( new Date(2000, 0, 15, 2, 2, 2, 2) );
+				const date = dayjs( new Date(2000, 0, 15, 2, 2, 2, 2) );
 				const onNavigate = vi.fn();
 				const onBeforeNavigate = vi.fn((next) => next);
 				const component = utils.createDatetime(
@@ -631,7 +628,7 @@ describe('Datetime', () => {
 			});
 			
 			it('prevent navigation using onBeforeNavigate', () => {
-				const date = moment( new Date(2000, 0, 15, 2, 2, 2, 2) );
+				const date = dayjs( new Date(2000, 0, 15, 2, 2, 2, 2) );
 				const onNavigate = vi.fn();
 				const onBeforeNavigate = vi.fn(() => false as any);
 
@@ -679,7 +676,7 @@ describe('Datetime', () => {
 
 			it('when selecting date', () => {
 				const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-					mDate = moment(date);
+					mDate = dayjs(date);
                 let captured: any = null;
 				const component = utils.createDatetime({ initialValue: date, onChange: (selected: any) => {
 					captured = selected;
@@ -694,7 +691,7 @@ describe('Datetime', () => {
 			it('when selecting multiple date in a row', () => {
 				let i = 0;
 				const date = new Date(2000, 0, 15, 2, 2, 2, 2),
-					mDate = moment(date);
+					mDate = dayjs(date);
                 let captured: any = null;
 				const component = utils.createDatetime({ initialValue: date, onChange: (selected: any) => {
 					i++;

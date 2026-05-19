@@ -21,17 +21,7 @@ export default defineConfig({
         find: 'replace-datetime',
         replacement: path.resolve(__dirname, '../src/index.tsx'),
       },
-      // Force a single moment singleton so locale registrations reach the library.
-      // moment/locale/* must come BEFORE the bare moment alias.
-      {
-        find: /^moment\/locale\/(.*)/,
-        replacement: path.resolve(__dirname, '../node_modules/moment/locale/$1'),
-      },
-      {
-        find: /^moment$/,
-        replacement: path.resolve(__dirname, '../node_modules/moment/moment.js'),
-      },
     ],
-    dedupe: ['react', 'react-dom', 'moment'],
+    dedupe: ['react', 'react-dom', 'dayjs'],
   },
 });

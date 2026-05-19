@@ -1,12 +1,12 @@
 import { it, describe, expect, vi } from 'vitest';
-import React from 'react';
 import Datetime from '../src/index';
 import { render } from '@testing-library/react';
 
 // Mock date to get rid of time as a factor to make tests deterministic
 // 2016-12-21T23:36:07.071Z
 const mockNow = 1482363367071;
-vi.spyOn(Date, 'now').mockImplementation(() => mockNow);
+vi.useFakeTimers();
+vi.setSystemTime(mockNow);
 
 it('everything default: renders correctly', () => {
 	const { asFragment } = render(<Datetime />);
@@ -126,7 +126,7 @@ describe('inputProps', () => {
 });
 
 it('isValidDate: only valid if after yesterday', () => {
-	const yesterday = (Datetime as any).moment().subtract(1, 'day');
+	const yesterday = (Datetime as any).dayjs().subtract(1, 'day');
 	const valid = (current: any) => current.isAfter(yesterday);
 	const { asFragment } = render(<Datetime isValidDate={ valid } />);
 	expect(asFragment()).toMatchSnapshot();
@@ -139,7 +139,7 @@ it('renderDay: specified', () => {
 });
 
 it('renderMonth: specified', () => {
-	const renderMonth = (props: any, month: number, year: number) => <td {...props}>{ '0' + month }</td>;
+	const renderMonth = (props: any, month: number) => <td {...props}>{ '0' + month }</td>;
 	const { asFragment } = render(<Datetime renderMonth={renderMonth} />);
 	expect(asFragment()).toMatchSnapshot();
 });

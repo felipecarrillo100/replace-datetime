@@ -1,6 +1,6 @@
 {
   "name": "replace-datetime",
-  "version": "4.0.7",
+  "version": "5.0.0",
   "description": "A lightweight but complete datetime picker component compatible with React 16.8+, 17, 18 and 19",
   "homepage": "https://github.com/felipecarrillo100/replace-datetime",
   "repository": {
@@ -38,7 +38,7 @@
   "author": "Felipe Carrillo",
   "license": "MIT",
   "peerDependencies": {
-    "moment": "^2.16.0",
+    "dayjs": "^1.11.0",
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
@@ -50,13 +50,12 @@
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "dayjs": "^1.11.13",
     "eslint": "^9.19.0",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.1.0",
     "globals": "^15.14.0",
     "jsdom": "^26.0.0",
-    "moment": "^2.30.1",
-    "moment-timezone": "^0.5.45",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "tsup": "^8.5.1",

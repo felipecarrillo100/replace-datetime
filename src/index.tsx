@@ -16,11 +16,25 @@
  * ```
  */
 import React, { useState, useEffect, useCallback, useImperativeHandle, forwardRef, useRef } from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import localeData from 'dayjs/plugin/localeData';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import dayOfYear from 'dayjs/plugin/dayOfYear';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+
 import DaysView from './views/DaysView';
 import MonthsView from './views/MonthsView';
 import YearsView from './views/YearsView';
 import TimeView from './views/TimeView';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(localeData);
+dayjs.extend(customParseFormat);
+dayjs.extend(dayOfYear);
+dayjs.extend(localizedFormat);
 
 /**
  * The calendar view currently rendered by the picker.
@@ -51,7 +65,7 @@ const viewModes: Record<string, ViewMode> = {
  * const ref = useRef<DatetimeHandle>(null);
  *
  * // Navigate the calendar to a specific date
- * ref.current?.setViewDate(moment('2025-06-01'));
+ * ref.current?.setViewDate(dayjs('2025-06-01'));
  *
  * // Switch the active view
  * ref.current?.navigate('years');
@@ -67,9 +81,9 @@ const viewModes: Record<string, ViewMode> = {
 export interface DatetimeHandle {
 	/**
 	 * Navigate the calendar to the given date without changing the selected value.
-	 * @param date - A `moment` object, native `Date`, or date string.
+	 * @param date - A `dayjs` object, native `Date`, or date string.
 	 */
-	setViewDate: (date: moment.Moment | Date | string) => void;
+	setViewDate: (date: dayjs.Dayjs | Date | string) => void;
 
 	/**
 	 * Programmatically switch the active calendar view.
@@ -84,9 +98,9 @@ export interface DatetimeHandle {
 		/** The view currently rendered inside the calendar. */
 		currentView: ViewMode;
 		/** The date the calendar is currently navigated to. */
-		viewDate: moment.Moment;
+		viewDate: dayjs.Dayjs;
 		/** The selected date, or `undefined` if nothing is selected. */
-		selectedDate: moment.Moment | undefined;
+		selectedDate: dayjs.Dayjs | undefined;
 		/** The current raw string value of the text input. */
 		inputValue: string;
 	};
@@ -103,23 +117,23 @@ export interface DateTimeProps {
 
 	/**
 	 * The currently selected date/time value (controlled mode).
-	 * Accepts a `moment` object, a native `Date`, or a date string.
+	 * Accepts a `dayjs` object, a native `Date`, or a date string.
 	 * When provided the picker becomes a controlled component.
 	 */
-	value?: moment.Moment | Date | string;
+	value?: dayjs.Dayjs | Date | string;
 
 	/**
 	 * Initial value for the picker in uncontrolled mode.
-	 * Accepts a `moment` object, a native `Date`, or a date string.
+	 * Accepts a `dayjs` object, a native `Date`, or a date string.
 	 */
-	initialValue?: moment.Moment | Date | string;
+	initialValue?: dayjs.Dayjs | Date | string;
 
 	/**
 	 * The date/time that the calendar initially navigates to (i.e. the month
 	 * shown when the picker first opens). Defaults to `value`, `initialValue`,
 	 * or today if neither is set.
 	 */
-	initialViewDate?: moment.Moment | Date | string;
+	initialViewDate?: dayjs.Dayjs | Date | string;
 
 	/**
 	 * Which calendar view to show first.
@@ -134,24 +148,24 @@ export interface DateTimeProps {
 	 * Called when the calendar/time-picker overlay is closed.
 	 * @param value - The currently selected value at close time.
 	 */
-	onClose?: (value: moment.Moment | string) => void;
+	onClose?: (value: dayjs.Dayjs | string) => void;
 
 	/**
 	 * Called every time the user changes the selected value, whether by
 	 * clicking a day/month/year, adjusting the time spinner, or typing in
 	 * the input field.
 	 *
-	 * @param value - A valid `moment` object when the input is parseable,
+	 * @param value - A valid `dayjs` object when the input is parseable,
 	 *   or the raw string when it cannot be parsed.
 	 *
 	 * @example
 	 * ```tsx
 	 * <Datetime onChange={(v) => {
-	 *   if (moment.isMoment(v)) console.log(v.toISOString());
+	 *   if (dayjs.isDayjs(v)) console.log(v.toISOString());
 	 * }} />
 	 * ```
 	 */
-	onChange?: (value: moment.Moment | string) => void;
+	onChange?: (value: dayjs.Dayjs | string) => void;
 
 	/**
 	 * Called when the user navigates to a different view (e.g. from days to months).
@@ -165,10 +179,10 @@ export interface DateTimeProps {
 	 *
 	 * @param nextView - The view the user is trying to navigate to.
 	 * @param currentView - The view currently displayed.
-	 * @param viewDate - The `moment` date currently in focus.
+	 * @param viewDate - The `dayjs` date currently in focus.
 	 * @returns The `ViewMode` that should actually be shown.
 	 */
-	onBeforeNavigate?: (nextView: ViewMode, currentView: ViewMode, viewDate: moment.Moment) => ViewMode;
+	onBeforeNavigate?: (nextView: ViewMode, currentView: ViewMode, viewDate: dayjs.Dayjs) => ViewMode;
 
 	/**
 	 * Called when the user clicks the "previous" navigation arrow.
@@ -192,7 +206,7 @@ export interface DateTimeProps {
 	updateOnView?: ViewMode;
 
 	/**
-	 * A [moment locale](https://momentjs.com/docs/#/i18n/) identifier string
+	 * A [dayjs locale](https://day.js.org/docs/en/i18n/i18n) identifier string
 	 * (e.g. `'es'`, `'fr'`, `'de'`). Applied to month/day names and the default
 	 * date/time format.
 	 *
@@ -210,8 +224,8 @@ export interface DateTimeProps {
 	utc?: boolean;
 
 	/**
-	 * A [moment-timezone](https://momentjs.com/timezone/) zone name
-	 * (e.g. `'America/New_York'`). Requires `moment-timezone` to be installed.
+	 * A timezone zone name
+	 * (e.g. `'America/New_York'`).
 	 */
 	displayTimeZone?: string;
 
@@ -225,7 +239,7 @@ export interface DateTimeProps {
 	input?: boolean;
 
 	/**
-	 * Moment.js format string for the date portion (e.g. `'YYYY-MM-DD'`).
+	 * Day.js format string for the date portion (e.g. `'YYYY-MM-DD'`).
 	 * Pass `false` to hide the date part entirely (time-only picker).
 	 * Pass `true` to use the locale default.
 	 *
@@ -239,7 +253,7 @@ export interface DateTimeProps {
 	dateFormat?: string | boolean;
 
 	/**
-	 * Moment.js format string for the time portion (e.g. `'HH:mm:ss'`).
+	 * Day.js format string for the time portion (e.g. `'HH:mm:ss'`).
 	 * Pass `false` to hide the time part entirely (date-only picker).
 	 * Pass `true` to use the locale default.
 	 *
@@ -278,15 +292,15 @@ export interface DateTimeProps {
 	/**
 	 * Return `true` for dates that should be selectable, `false` to disable them.
 	 *
-	 * @param date - The `moment` date being evaluated.
+	 * @param date - The `dayjs` date being evaluated.
 	 * @returns `true` if the date is valid/selectable.
 	 *
 	 * @example Disable past dates
 	 * ```tsx
-	 * <Datetime isValidDate={(d) => d.isSameOrAfter(moment(), 'day')} />
+	 * <Datetime isValidDate={(d) => d.isSameOrAfter(dayjs(), 'day')} />
 	 * ```
 	 */
-	isValidDate?: (date: moment.Moment) => boolean;
+	isValidDate?: (date: dayjs.Dayjs) => boolean;
 
 	/**
 	 * Programmatically control whether the calendar overlay is open.
@@ -375,7 +389,7 @@ export interface DateTimeProps {
 	 * Custom render function for each day cell in the calendar grid.
 	 *
 	 * @param props - Props to spread on the `<td>` element (includes click handlers).
-	 * @param date - The `moment` date for this cell.
+	 * @param date - The `dayjs` date for this cell.
 	 * @param selectedDate - The currently selected date, if any.
 	 *
 	 * @example Highlight weekends
@@ -389,7 +403,7 @@ export interface DateTimeProps {
 	 * />
 	 * ```
 	 */
-	renderDay?: (props: any, date: moment.Moment, selectedDate?: moment.Moment) => React.ReactNode;
+	renderDay?: (props: any, date: dayjs.Dayjs, selectedDate?: dayjs.Dayjs) => React.ReactNode;
 
 	/**
 	 * Custom render function for each month cell in the month-selection view.
@@ -399,7 +413,7 @@ export interface DateTimeProps {
 	 * @param year - Full four-digit year.
 	 * @param selectedDate - The currently selected date, if any.
 	 */
-	renderMonth?: (props: any, month: number, year: number, selectedDate?: moment.Moment) => React.ReactNode;
+	renderMonth?: (props: any, month: number, year: number, selectedDate?: dayjs.Dayjs) => React.ReactNode;
 
 	/**
 	 * Custom render function for each year cell in the year-selection view.
@@ -408,7 +422,7 @@ export interface DateTimeProps {
 	 * @param year - Full four-digit year.
 	 * @param selectedDate - The currently selected date, if any.
 	 */
-	renderYear?: (props: any, year: number, selectedDate?: moment.Moment) => React.ReactNode;
+	renderYear?: (props: any, year: number, selectedDate?: dayjs.Dayjs) => React.ReactNode;
 }
 
 const nofn = () => {};
@@ -474,39 +488,45 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 		inputProps = {},
 	} = props;
 
-	const localMoment = useCallback((date?: any, format?: string | boolean) => {
-		let m: moment.Moment;
+	const localDayjs = useCallback((date?: any, format?: string | boolean) => {
+		let m: dayjs.Dayjs;
 		const parseFormat = typeof format === 'string' ? format : undefined;
 
 		if (props.utc || utc) {
-			m = moment.utc(date, parseFormat, props.strictParsing ?? strictParsing);
+			m = dayjs.utc(date, parseFormat, strictParsing);
 		} else if (props.displayTimeZone) {
-			m = (moment as any).tz(date, parseFormat, props.displayTimeZone);
+			if (parseFormat) {
+				m = dayjs.tz(date, parseFormat, props.displayTimeZone);
+			} else {
+				m = dayjs.tz(date, props.displayTimeZone);
+			}
 		} else {
-			m = moment(date, parseFormat, props.strictParsing ?? strictParsing);
-			if (moment.isMoment(date)) m.local();
+			m = dayjs(date, parseFormat, strictParsing);
+			if (dayjs.isDayjs(date)) m = m.local();
 		}
 
-		if (props.locale) m.locale(props.locale);
+		if (props.locale) m = m.locale(props.locale);
 		return m;
-	}, [props.utc, utc, props.displayTimeZone, props.strictParsing, strictParsing, props.locale]);
+	}, [props.utc, utc, props.displayTimeZone, props.locale, strictParsing]);
 
 	const parseDate = useCallback((date: any, format: string | boolean) => {
-		let parsedDate: moment.Moment | null = null;
+		let parsedDate: dayjs.Dayjs | null = null;
 		if (date && typeof date === 'string')
-			parsedDate = localMoment(date, format);
+			parsedDate = localDayjs(date, format);
 		else if (date)
-			parsedDate = localMoment(date);
+			parsedDate = localDayjs(date);
 
 		if (parsedDate && !parsedDate.isValid())
 			parsedDate = null;
 
 		return parsedDate;
-	}, [localMoment]);
+	}, [localDayjs]);
 
+	const propValue = props.value;
+	const propDefaultValue = (props as any).defaultValue;
 	const getLocaleData = useCallback(() => {
-		return localMoment(props.value || (props as any).defaultValue || new Date()).localeData();
-	}, [localMoment, props.value, (props as any).defaultValue]);
+		return localDayjs(propValue || propDefaultValue || new Date()).localeData();
+	}, [localDayjs, propValue, propDefaultValue]);
 
 	const getDateFormat = useCallback(() => {
 		const locale = getLocaleData();
@@ -530,18 +550,17 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 	}, [getDateFormat, getTimeFormat]);
 
 	const getInitialDate = useCallback(() => {
-		const m = localMoment();
-		m.hour(0).minute(0).second(0).millisecond(0);
-		return m;
-	}, [localMoment]);
+		const m = localDayjs();
+		return m.hour(0).minute(0).second(0).millisecond(0);
+	}, [localDayjs]);
 
-	const getInitialViewDate = useCallback((selectedDate?: moment.Moment | null) => {
+	const getInitialViewDate = useCallback((selectedDate?: dayjs.Dayjs | null) => {
 		const propDate = props.initialViewDate;
 		if (propDate) {
 			const viewDate = parseDate(propDate, getFormat('datetime'));
 			if (viewDate && viewDate.isValid()) return viewDate;
 		} else if (selectedDate && selectedDate.isValid()) {
-			return selectedDate.clone();
+			return selectedDate;
 		}
 		return getInitialDate();
 	}, [props.initialViewDate, parseDate, getFormat, getInitialDate]);
@@ -559,7 +578,7 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 		return df ? getUpdateOn(df) : viewModes.TIME;
 	}, [getDateFormat, getUpdateOn]);
 
-	const getInitialInputValue = useCallback((selectedDate?: moment.Moment | null) => {
+	const getInitialInputValue = useCallback((selectedDate?: dayjs.Dayjs | null) => {
 		if (inputProps.value !== undefined) return inputProps.value as string;
 		if (selectedDate && selectedDate.isValid()) return selectedDate.format(getFormat('datetime'));
 		if (props.value && typeof props.value === 'string') return props.value;
@@ -570,18 +589,18 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 	// State
 	const [open, setOpen] = useState(() => !input);
 	const [currentView, setCurrentView] = useState<ViewMode>(() => (props.initialViewMode || getInitialView()) as ViewMode);
-	const [selectedDate, setSelectedDate] = useState<moment.Moment | undefined>(() => {
+	const [selectedDate, setSelectedDate] = useState<dayjs.Dayjs | undefined>(() => {
 		const date = parseDate(props.value || props.initialValue, getFormat('datetime'));
 		return date && date.isValid() ? date : undefined;
 	});
-	const [viewDate, setViewDateState] = useState<moment.Moment>(() => getInitialViewDate(selectedDate));
+	const [viewDate, setViewDateState] = useState<dayjs.Dayjs>(() => getInitialViewDate(selectedDate));
 	const [inputValue, setInputValue] = useState<string>(() => getInitialInputValue(selectedDate));
 
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	// Imperative Handle
 	useImperativeHandle(ref, (): DatetimeHandle => ({
-		setViewDate: (date: moment.Moment | Date | string) => {
+		setViewDate: (date: dayjs.Dayjs | Date | string) => {
 			const vd = parseDate(date, getFormat('datetime'));
 			if (vd && vd.isValid()) setViewDateState(vd);
 		},
@@ -601,8 +620,8 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 		return !input || (props.open === undefined ? open : props.open);
 	}, [input, props.open, open]);
 
-	const showView = useCallback((view: ViewMode, date?: moment.Moment) => {
-		const d = (date || viewDate).clone();
+	const showView = useCallback((view: ViewMode, date?: dayjs.Dayjs) => {
+		const d = date || viewDate;
 		const nextView = onBeforeNavigate(view, currentView, d);
 		if (nextView && currentView !== nextView) {
 			onNavigate(nextView);
@@ -627,43 +646,42 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 		const viewToMethod: any = { days: 'date', months: 'month', years: 'year' };
 		const nextViewMap: any = { days: 'time', months: 'days', years: 'months' };
 		
-		const vd = viewDate.clone();
-		vd[viewToMethod[currentView] as 'date' | 'month' | 'year'](
+		let vd = viewDate;
+		vd = vd[viewToMethod[currentView] as 'date' | 'month' | 'year'](
 			parseInt(target.getAttribute('data-value')!, 10)
 		);
 
 		if (currentView === 'days') {
-			vd.month(parseInt(target.getAttribute('data-month')!, 10));
-			vd.year(parseInt(target.getAttribute('data-year')!, 10));
+			vd = vd.month(parseInt(target.getAttribute('data-month')!, 10));
+			vd = vd.year(parseInt(target.getAttribute('data-year')!, 10));
 		}
 
 		const updateOnView = getUpdateOn(getDateFormat());
 		if (currentView === updateOnView) {
-			setSelectedDate(vd.clone());
+			setSelectedDate(vd);
 			setInputValue(vd.format(getFormat('datetime')));
 			if (props.open === undefined && input && closeOnSelect) {
 				closeCalendar();
 			}
-			onChange(vd.clone());
+			onChange(vd);
 		} else {
 			showView(nextViewMap[currentView], vd);
 		}
 		setViewDateState(vd);
 	}, [viewDate, currentView, getUpdateOn, getDateFormat, getFormat, props.open, input, closeOnSelect, closeCalendar, onChange, showView]);
 
-	const viewNavigate = useCallback((modifier: number, unit: moment.unitOfTime.DurationConstructor) => {
-		const vd = viewDate.clone().add(modifier, unit);
+	const viewNavigate = useCallback((modifier: number, unit: any) => {
+		const vd = viewDate.add(modifier, unit);
 		if (modifier > 0) onNavigateForward(modifier, unit);
 		else onNavigateBack(-modifier, unit);
 		setViewDateState(vd);
 	}, [viewDate, onNavigateForward, onNavigateBack]);
 
 	const setTime = useCallback((type: string, value: number) => {
-		const date = (selectedDate || viewDate).clone();
-		(date as any)[type](value);
+		const date = (selectedDate || viewDate)[type as 'hour' | 'minute' | 'second' | 'millisecond'](value);
 		if (!props.value) {
 			setSelectedDate(date);
-			setViewDateState(date.clone());
+			setViewDateState(date);
 			setInputValue(date.format(getFormat('datetime')));
 		}
 		onChange(date);
@@ -671,29 +689,29 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 
 	const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement> | string) => {
 		const value = typeof e === 'string' ? e : e.target.value;
-		const m = localMoment(value, getFormat('datetime'));
+		const m = localDayjs(value, getFormat('datetime'));
 		setInputValue(value);
 		if (m.isValid()) {
 			setSelectedDate(m);
-			setViewDateState(m.clone().startOf('month'));
+			setViewDateState(m.startOf('month'));
 		} else {
 			setSelectedDate(undefined);
 		}
 		onChange(m.isValid() ? m : value);
-	}, [localMoment, getFormat, onChange]);
+	}, [localDayjs, getFormat, onChange]);
 
 	// Effects
 	useEffect(() => {
 		setViewDateState(prev => {
-			const vd = localMoment(prev);
+			const vd = localDayjs(prev);
 			return vd.isValid() ? vd : prev;
 		});
 		setSelectedDate(prev => {
 			if (!prev) return undefined;
-			const sd = localMoment(prev);
+			const sd = localDayjs(prev);
 			return sd.isValid() ? sd : prev;
 		});
-	}, [props.locale, props.utc, props.displayTimeZone, localMoment]);
+	}, [props.locale, props.utc, props.displayTimeZone, localDayjs]);
 
 	useEffect(() => {
 		if (props.value !== undefined) {
@@ -755,7 +773,7 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 	};
 
 	const renderCalendar = () => {
-		const localizedViewDate = viewDate.clone();
+		const localizedViewDate = viewDate;
 		if (props.locale) localizedViewDate.locale(props.locale);
 
 		const viewProps: any = {
@@ -764,7 +782,7 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 			isValidDate: props.isValidDate || (() => true),
 			updateDate,
 			navigate: viewNavigate,
-			moment: localMoment,
+			moment: localDayjs,
 			showView
 		};
 
@@ -799,7 +817,7 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 });
 
 Datetime.displayName = 'Datetime';
-(Datetime as any).moment = moment;
+(Datetime as any).dayjs = dayjs;
 
 /** @public */
 export { Datetime };

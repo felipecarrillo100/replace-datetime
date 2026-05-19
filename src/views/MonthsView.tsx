@@ -1,15 +1,15 @@
 /** @internal */
 import React from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import ViewNavigation from '../parts/ViewNavigation';
 
 interface MonthsViewProps {
-	viewDate: moment.Moment;
-	selectedDate?: moment.Moment;
-	isValidDate?: (date: moment.Moment) => boolean;
-	renderMonth?: (props: any, month: number, year: number, selectedDate?: moment.Moment) => React.ReactNode;
+	viewDate: dayjs.Dayjs;
+	selectedDate?: dayjs.Dayjs;
+	isValidDate?: (date: dayjs.Dayjs) => boolean;
+	renderMonth?: (props: any, month: number, year: number, selectedDate?: dayjs.Dayjs) => React.ReactNode;
 	updateDate: (e: React.MouseEvent) => void;
-	navigate: (amount: number, type: moment.unitOfTime.DurationConstructor) => void;
+	navigate: (amount: number, type: any) => void;
 	showView: (view: string) => void;
 }
 
@@ -41,7 +41,7 @@ export default function MonthsView({
 			return false;
 		}
 
-		const date = viewDate.clone().set({ month });
+		const date = viewDate.set('month', month);
 		let day = date.endOf('month').date() + 1;
 
 		while (day-- > 1) {
@@ -53,8 +53,8 @@ export default function MonthsView({
 	};
 
 	const getMonthText = (month: number) => {
-		const localMoment = viewDate.clone().month(month);
-		const monthStr = localMoment.localeData().monthsShort(localMoment);
+		const localMoment = viewDate.month(month);
+		const monthStr = localMoment.localeData().monthsShort(localMoment) as unknown as string;
 
 		return capitalize(monthStr.substring(0, 3));
 	};
@@ -80,7 +80,7 @@ export default function MonthsView({
 				props,
 				month,
 				viewDate.year(),
-				selectedDate ? selectedDate.clone() : undefined
+				selectedDate
 			);
 			return React.isValidElement(element) ? React.cloneElement(element, { key: month }) : element;
 		}
@@ -97,7 +97,7 @@ export default function MonthsView({
 
 		for (let month = 0; month < 12; month++) {
 			const rowIndex = Math.floor(month / 4);
-			rows[rowIndex].push(renderSingleMonth(month));
+			rows[rowIndex]!.push(renderSingleMonth(month));
 		}
 
 		return rows.map((months, i) => (
@@ -124,3 +124,4 @@ export default function MonthsView({
 function capitalize(str: string) {
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
+

@@ -1,15 +1,15 @@
 /** @internal */
 import React from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import ViewNavigation from '../parts/ViewNavigation';
 
 interface YearsViewProps {
-	viewDate: moment.Moment;
-	selectedDate?: moment.Moment;
-	isValidDate?: (date: moment.Moment) => boolean;
-	renderYear?: (props: any, year: number, selectedDate?: moment.Moment) => React.ReactNode;
+	viewDate: dayjs.Dayjs;
+	selectedDate?: dayjs.Dayjs;
+	isValidDate?: (date: dayjs.Dayjs) => boolean;
+	renderYear?: (props: any, year: number, selectedDate?: dayjs.Dayjs) => React.ReactNode;
 	updateDate: (e: React.MouseEvent) => void;
-	navigate: (amount: number, type: moment.unitOfTime.DurationConstructor) => void;
+	navigate: (amount: number, type: any) => void;
 	showView: (view: string) => void;
 }
 
@@ -35,7 +35,7 @@ export default function YearsView({
 			return false;
 		}
 
-		const date = viewDate.clone().set({ year });
+		const date = viewDate.set('year', year);
 		let day = date.endOf('year').dayOfYear() + 1;
 
 		while (day-- > 1) {
@@ -67,7 +67,7 @@ export default function YearsView({
 		const element = renderYear(
 			props,
 			year,
-			selectedDate ? selectedDate.clone() : undefined
+			selectedDate
 		);
 		return React.isValidElement(element) ? React.cloneElement(element, { key: year }) : element;
 	};
@@ -90,20 +90,13 @@ export default function YearsView({
 		const rows: React.ReactNode[][] = [[], [], []];
 
 		for (let year = viewYear - 1; year < viewYear + 11; year++) {
-			const rowIndex = Math.floor((year - viewYear + 1) / 4);
-			// The original logic was:
-			// if ( year < 3 ) return rows[0];
-			// if ( year < 7 ) return rows[1];
-			// return rows[2];
-			// But year is year - viewYear.
-			// Let's stick to the original getRow logic for exact compatibility.
 			const relativeYear = year - viewYear;
 			let rowIdx = 0;
 			if (relativeYear < 3) rowIdx = 0;
 			else if (relativeYear < 7) rowIdx = 1;
 			else rowIdx = 2;
 			
-			rows[rowIdx].push(renderSingleYear(year));
+			rows[rowIdx]!.push(renderSingleYear(year));
 		}
 
 		return rows.map((years, i) => (
@@ -126,3 +119,4 @@ export default function YearsView({
 		</div>
 	);
 }
+

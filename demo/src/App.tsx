@@ -1,20 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import moment from 'moment';
-import 'moment/locale/es';
-import 'moment/locale/fr';
-import 'moment/locale/de';
+import dayjs from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import 'dayjs/locale/es';
+import 'dayjs/locale/fr';
+import 'dayjs/locale/de';
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(localizedFormat);
 
 // Reset global locale to English so that imports don't hijack the default state
-moment.locale('en');
+dayjs.locale('en');
 
 import Datetime, { DateTimeProps, DatetimeHandle } from 'replace-datetime';
 import 'replace-datetime/css/react-datetime.css';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-const fmtDisplay = (v: moment.Moment | string | undefined): string => {
+const fmtDisplay = (v: dayjs.Dayjs | string | undefined): string => {
   if (!v) return '—';
-  if (moment.isMoment(v)) return v.format('LLLL');
+  if (dayjs.isDayjs(v)) return v.format('LLLL');
   return String(v);
 };
 
@@ -82,36 +87,36 @@ export default function App() {
   useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
 
   // Demo 1 — basic controlled date picker
-  const [basicDate, setBasicDate] = useState<moment.Moment | string | undefined>();
+  const [basicDate, setBasicDate] = useState<dayjs.Dayjs | string | undefined>();
 
   // Demo 2 — time only
-  const [timeValue, setTimeValue] = useState<moment.Moment | string | undefined>();
+  const [timeValue, setTimeValue] = useState<dayjs.Dayjs | string | undefined>();
 
   // Demo 3 — date + time with seconds
-  const [datetimeValue, setDatetimeValue] = useState<moment.Moment | string | undefined>();
+  const [datetimeValue, setDatetimeValue] = useState<dayjs.Dayjs | string | undefined>();
 
   // Demo 4 — inline (static) calendar
-  const [inlineDate, setInlineDate] = useState<moment.Moment | string | undefined>();
+  const [inlineDate, setInlineDate] = useState<dayjs.Dayjs | string | undefined>();
 
   // Demo 5 — no past dates
-  const [futureDate, setFutureDate] = useState<moment.Moment | string | undefined>();
+  const [futureDate, setFutureDate] = useState<dayjs.Dayjs | string | undefined>();
 
   // Demo 6 — locale switcher
   const [locale, setLocale] = useState<string>('en');
-  const [localizedDate, setLocalizedDate] = useState<moment.Moment | string | undefined>();
+  const [localizedDate, setLocalizedDate] = useState<dayjs.Dayjs | string | undefined>();
 
   // Demo 7 — custom renderDay (highlight weekends)
-  const [weekendDate, setWeekendDate] = useState<moment.Moment | string | undefined>();
+  const [weekendDate, setWeekendDate] = useState<dayjs.Dayjs | string | undefined>();
 
   // Demo 8 — imperative ref
   const dtRef = useRef<DatetimeHandle>(null);
-  const [refDate, setRefDate] = useState<moment.Moment | string | undefined>();
-  const [defaultDatetime, setDefaultDatetime] = useState<moment.Moment | string | undefined>();
-  const jumpToToday = () => dtRef.current?.setViewDate(moment());
-  const jumpToNextYear = () => dtRef.current?.setViewDate(moment().add(1, 'year'));
+  const [refDate, setRefDate] = useState<dayjs.Dayjs | string | undefined>();
+  const [defaultDatetime, setDefaultDatetime] = useState<dayjs.Dayjs | string | undefined>();
+  const jumpToToday = () => dtRef.current?.setViewDate(dayjs());
+  const jumpToNextYear = () => dtRef.current?.setViewDate(dayjs().add(1, 'year'));
 
   const isNotPast: DateTimeProps['isValidDate'] = (d) =>
-    d.isSameOrAfter(moment().startOf('day'));
+    d.isSameOrAfter(dayjs().startOf('day'));
 
   const renderWeekendDay: DateTimeProps['renderDay'] = (props, date, selected) => {
     const isWeekend = date.day() === 0 || date.day() === 6;
@@ -135,7 +140,7 @@ export default function App() {
           <p className="hero-sub">
             A lightweight, fully-featured datetime picker — drop-in replacement for{' '}
             <code>react-datetime</code>.
-            <br />Zero legacy dependencies · TypeScript native · Moment.js powered.
+            <br />Zero legacy dependencies · TypeScript native · Day.js powered.
           </p>
           <div className="hero-links">
             <a
@@ -164,7 +169,7 @@ export default function App() {
               API Docs
             </a>
           </div>
-          <CodeSnippet code="npm install replace-datetime moment" />
+          <CodeSnippet code="npm install replace-datetime dayjs" />
         </div>
       </header>
 
@@ -306,7 +311,7 @@ export default function App() {
           />
           <CodeSnippet code={`<Datetime
   timeFormat={false}
-  isValidDate={(d) => d.isSameOrAfter(moment(), 'day')}
+  isValidDate={(d) => d.isSameOrAfter(dayjs(), 'day')}
   onChange={(v) => setValue(v)}
 />`} />
         </Card>
@@ -393,7 +398,7 @@ export default function App() {
           <CodeSnippet code={`const ref = useRef<DatetimeHandle>(null);
 <Datetime ref={ref} input={false} ... />
 // later:
-ref.current?.setViewDate(moment());
+ref.current?.setViewDate(dayjs());
 ref.current?.navigate('months');`} />
         </Card>
 

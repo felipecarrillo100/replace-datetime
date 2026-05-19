@@ -15,12 +15,13 @@ The original `react-datetime` library was a staple of the React ecosystem for ye
 
 **Key improvements in this fork:**
 - **React 19 Ready**: Full support for React 18/19 features, including Strict Mode and the React Compiler.
+- **Day.js Powered**: Replaced the heavy, legacy Moment.js library with lightweight, modern, and immutable Day.js.
 - **Functional Components**: Completely rewritten using modern React Hooks (`useState`, `useEffect`, `useImperativeHandle`).
 - **TypeScript Native**: Built from the ground up with TypeScript for superior developer experience and type safety.
 - **Modern Tooling**: Powered by Vite 8 and tsup, ensuring fast builds and modern module distribution (ESM/CJS).
 - **Zero Legacy Bloat**: Removed outdated dependencies and legacy lifecycle methods.
 
-## Migration from `react-datetime`
+## Migration from `react-datetime` (Legacy Component)
 
 Migrating is designed to be a seamless, drop-in process.
 
@@ -46,8 +47,6 @@ Migrating is designed to be a seamless, drop-in process.
    + import "replace-datetime/css/react-datetime.css";
    ```
 
-The API remains 100% compatible with the original library, including the imperative methods.
-
 ## Installation
 
 ```sh
@@ -56,7 +55,7 @@ npm install replace-datetime
 
 ## Usage
 
-React and Moment.js are peer dependencies for `replace-datetime`.
+React and Day.js are peer dependencies for `replace-datetime`.
 
 ```tsx
 import Datetime from 'replace-datetime';
@@ -71,12 +70,12 @@ function MyComponent() {
 
 | Name | Type | Default | Description |
 | ---- | ---- | ------- | ----------- |
-| **value** | `Date \| string \| moment` | `new Date()` | Selected date for controlled component usage. |
-| **initialValue** | `Date \| string \| moment` | `new Date()` | Selected date for uncontrolled component usage. |
-| **initialViewDate** | `Date \| string \| moment` | `new Date()` | The date shown in the calendar on open. |
+| **value** | `Date \| string \| dayjs` | `new Date()` | Selected date for controlled component usage. |
+| **initialValue** | `Date \| string \| dayjs` | `new Date()` | Selected date for uncontrolled component usage. |
+| **initialViewDate** | `Date \| string \| dayjs` | `new Date()` | The date shown in the calendar on open. |
 | **initialViewMode** | `string` | `'days'` | Initial view (`'years'`, `'months'`, `'days'`, `'time'`). |
-| **dateFormat** | `boolean \| string` | `true` | Moment.js date format. Set `false` to disable date selection. |
-| **timeFormat** | `boolean \| string` | `true` | Moment.js time format. Set `false` to disable time selection. |
+| **dateFormat** | `boolean \| string` | `true` | Day.js date format. Set `false` to disable date selection. |
+| **timeFormat** | `boolean \| string` | `true` | Day.js time format. Set `false` to disable time selection. |
 | **input** | `boolean` | `true` | Whether to show an input field. |
 | **open** | `boolean` | `null` | Manual control over calendar visibility. |
 | **onChange** | `function` | | Callback when date changes. |
@@ -172,6 +171,51 @@ Override any `--rdt-*` token to create your own palette:
 
 ---
 
+## Migration from `replace-datetime` v4 to v5 (Moment.js to Day.js)
+
+Version 5.x of `replace-datetime` replaces **Moment.js** with **Day.js** to significantly reduce bundle size, improve performance, and adopt immutable date manipulation.
+
+To upgrade from v4 to v5:
+
+1. **Update package dependencies:**
+   Remove `moment` (if no longer used elsewhere in your application) and install `dayjs`:
+   ```sh
+   npm uninstall moment
+   npm install replace-datetime@5 dayjs
+   ```
+
+2. **Update your Types:**
+   Change references to `moment.Moment` in your code and component prop types to `dayjs.Dayjs`:
+   ```diff
+   - import moment from 'moment';
+   - const [value, setValue] = useState<moment.Moment>();
+   + import dayjs from 'dayjs';
+   + const [value, setValue] = useState<dayjs.Dayjs>();
+   ```
+
+3. **Load Day.js plugins:**
+   Day.js requires explicit plugins to match the advanced formatting, locales, and timezone features of Moment. If you use custom parsing format strings, timezone conversions, or query methods like `isSameOrAfter`, add the following to your application entry point:
+   ```typescript
+   import dayjs from 'dayjs';
+   import utc from 'dayjs/plugin/utc';
+   import timezone from 'dayjs/plugin/timezone';
+   import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+   import localizedFormat from 'dayjs/plugin/localizedFormat';
+   import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+   dayjs.extend(utc);
+   dayjs.extend(timezone);
+   dayjs.extend(isSameOrAfter);
+   dayjs.extend(localizedFormat);
+   dayjs.extend(customParseFormat);
+   ```
+
+4. **Adjust custom handlers and date utilities:**
+    - **Immutability:** Operations on `dayjs` objects (e.g., `.add()`, `.subtract()`, `.startOf()`) are immutable and return a new instance. Unlike Moment, they do not modify the original instance.
+    - **Helper checks:** Replace `moment.isMoment(val)` with `dayjs.isDayjs(val)`.
+    - **Static exports:** Access the dayjs instance constructor using the component's static property: `Datetime.dayjs` (instead of `Datetime.moment`).
+
+
 ## Troubleshooting & Best Practices
 
 ### Clipping and Overflow Issues
@@ -188,21 +232,29 @@ The datetime picker is an absolutely positioned element. If any parent container
   }
   ```
 
-### Moment.js and Global Locales
-This library relies on Moment.js for all date manipulation and localization.
+### Day.js Locales and Plugins
+This library relies on Day.js for all date manipulation and localization.
 
-**⚠️ Warning on Global Side-Effects:**
-Importing a locale file in Moment (e.g., `import 'moment/locale/de'`) automatically switches the global locale to that language. If your application imports multiple locales, the last one imported will become the default for all pickers.
+**⚠️ Loading Plugins and Locales:**
+Day.js uses a modular, plugin-based architecture and lazy-loads locales. If you wish to use custom formats, timezones, or specific locales, make sure to import and register them in your main application entry point:
 
-To prevent this "hijacking":
-1. **Explicitly reset the global locale** in your main entry file:
-   ```tsx
-   import 'moment/locale/fr';
-   import 'moment/locale/es';
-   import moment from 'moment';
-   moment.locale('en'); // Reset to your preferred default
-   ```
-2. **Use the `locale` prop** on the component instance to set the language for a specific picker without affecting the rest of your app.
+```tsx
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+import 'dayjs/locale/es';
+
+// Register plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(localizedFormat);
+
+// Set default locale
+dayjs.locale('en');
+```
 
 ---
 

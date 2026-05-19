@@ -1,17 +1,17 @@
 /** @internal */
 import React from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import ViewNavigation from '../parts/ViewNavigation';
 
 interface DaysViewProps {
-	viewDate: moment.Moment;
-	selectedDate?: moment.Moment;
-	isValidDate: (date: moment.Moment) => boolean;
-	renderDay: (props: any, date: moment.Moment, selectedDate?: moment.Moment) => React.ReactNode;
+	viewDate: dayjs.Dayjs;
+	selectedDate?: dayjs.Dayjs;
+	isValidDate: (date: dayjs.Dayjs) => boolean;
+	renderDay: (props: any, date: dayjs.Dayjs, selectedDate?: dayjs.Dayjs) => React.ReactNode;
 	updateDate: (e: React.MouseEvent) => void;
-	navigate: (amount: number, type: moment.unitOfTime.DurationConstructor) => void;
+	navigate: (amount: number, type: any) => void;
 	showView: (view: string) => void;
-	moment: () => moment.Moment;
+	moment: () => dayjs.Dayjs;
 	timeFormat?: string | boolean;
 }
 
@@ -53,12 +53,13 @@ export default function DaysView({
 		);
 	};
 
-	const getDaysOfWeek = (locale: moment.Locale) => {
+	const getDaysOfWeek = (locale: any) => {
 		const first = locale.firstDayOfWeek();
+		const weekdaysMin = locale.weekdaysMin();
 		const dow: string[] = [];
 		let i = 0;
 
-		(locale as any)._weekdaysMin.forEach(function (day: string) {
+		weekdaysMin.forEach(function (day: string) {
 			dow[(7 + (i++) - first) % 7] = day;
 		});
 
@@ -66,21 +67,21 @@ export default function DaysView({
 	};
 
 	const renderDays = () => {
-		const startOfMonth = viewDate.clone().startOf('month');
-		const endOfMonth = viewDate.clone().endOf('month');
+		const startOfMonth = viewDate.startOf('month');
+		const endOfMonth = viewDate.endOf('month');
 
 		const rows: React.ReactNode[][] = [[], [], [], [], [], []];
 
-		const startDate = viewDate.clone().subtract(1, 'months');
-		startDate.date(startDate.daysInMonth()).startOf('week');
+		let startDate = viewDate.subtract(1, 'months');
+		startDate = startDate.date(startDate.daysInMonth()).startOf('week');
 
-		const endDate = startDate.clone().add(42, 'd');
+		const endDate = startDate.add(42, 'd');
 		let i = 0;
 
 		while (startDate.isBefore(endDate)) {
 			const rowIndex = Math.floor(i / 7);
-			rows[rowIndex].push(renderSingleDay(startDate.clone(), startOfMonth, endOfMonth));
-			startDate.add(1, 'd');
+			rows[rowIndex]!.push(renderSingleDay(startDate, startOfMonth, endOfMonth));
+			startDate = startDate.add(1, 'd');
 			i++;
 		}
 
@@ -89,7 +90,7 @@ export default function DaysView({
 		));
 	};
 
-	const renderSingleDay = (date: moment.Moment, startOfMonth: moment.Moment, endOfMonth: moment.Moment) => {
+	const renderSingleDay = (date: dayjs.Dayjs, startOfMonth: dayjs.Dayjs, endOfMonth: dayjs.Dayjs) => {
 		const key = date.format('M_D');
 		const dayProps: any = {
 			'data-value': date.date(),
@@ -121,7 +122,7 @@ export default function DaysView({
 		dayProps.className = className;
 
 		const element = renderDay(
-			dayProps, date.clone(), selectedDate && selectedDate.clone()
+			dayProps, date, selectedDate
 		);
 		return React.isValidElement(element) ? React.cloneElement(element, { key }) : element;
 	};
@@ -157,3 +158,4 @@ export default function DaysView({
 		</div>
 	);
 }
+

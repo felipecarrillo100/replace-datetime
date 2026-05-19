@@ -1,6 +1,6 @@
 /** @internal */
 import React, { useState, useEffect, useRef } from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 const timeConstraints = {
 	hours: { min: 0, max: 23, step: 1 },
@@ -10,8 +10,8 @@ const timeConstraints = {
 };
 
 interface TimeViewProps {
-	viewDate: moment.Moment;
-	selectedDate?: moment.Moment;
+	viewDate: dayjs.Dayjs;
+	selectedDate?: dayjs.Dayjs;
 	timeConstraints?: any;
 	setTime: (type: string, value: number) => void;
 	showView: (view: string) => void;
@@ -44,13 +44,13 @@ export default function TimeView({
 	dateFormat
 }: TimeViewProps) {
 	const constraints = createConstraints(overrideTimeConstraints);
-	const getTimeParts = (date: moment.Moment) => {
-		const hours = date.hours();
+	const getTimeParts = (date: dayjs.Dayjs) => {
+		const hours = date.hour();
 		return {
 			hours: pad('hours', hours),
-			minutes: pad('minutes', date.minutes()),
-			seconds: pad('seconds', date.seconds()),
-			milliseconds: pad('milliseconds', date.milliseconds()),
+			minutes: pad('minutes', date.minute()),
+			seconds: pad('seconds', date.second()),
+			milliseconds: pad('milliseconds', date.millisecond()),
 			ampm: hours < 12 ? 'am' : 'pm'
 		};
 	};
@@ -206,3 +206,4 @@ export default function TimeView({
 		</div>
 	);
 }
+
