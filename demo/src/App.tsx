@@ -118,7 +118,8 @@ export default function App() {
   const isNotPast: DateTimeProps['isValidDate'] = (d) =>
     d.isSameOrAfter(dayjs().startOf('day'));
 
-  const renderWeekendDay: DateTimeProps['renderDay'] = (props, date, _selected) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const renderWeekendDay: DateTimeProps['renderDay'] = (props, date, selected) => {
     const isWeekend = date.day() === 0 || date.day() === 6;
     return (
       <td
