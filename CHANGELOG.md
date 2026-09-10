@@ -1,6 +1,31 @@
 Changelog
 =========
 
+## 5.1.0
+* Exposes the time-unit types that were previously internal: `TimeUnit`
+  (`'hours' | 'minutes' | 'seconds' | 'milliseconds'`), `TimeConstraint`
+  (`{ min?, max?, step? }`) and `TimeConstraints`, so a `timeConstraints` object
+  can be typed and built outside the JSX.
+* Types the `timeConstraints` prop, which was `any`. Well-formed values are
+  unaffected; TypeScript will now reject a misspelled unit or a stray field.
+  **This can surface as a new compile error** in a project that was passing
+  something the prop never actually supported — the runtime behaviour is
+  unchanged.
+* Skips the month and year validity scan when no `isValidDate` prop is given.
+  `MonthsView` and `YearsView` already guarded that scan, but the picker
+  substituted `() => true` for the missing prop, so the guard never fired and
+  every cell built throwaway Day.js objects to reach a foregone conclusion.
+  Rendering the year view now performs no such work at all (measured: 288 Day.js
+  operations before, 0 after) and the month view about a third as much. Pickers
+  that *do* pass `isValidDate` behave and cost exactly as before.
+* Removes a dead `viewDate.locale(props.locale)` call in the calendar renderer.
+  It was a Moment mutation idiom: Day.js is immutable, so the call built a
+  localized instance and discarded it. Locale handling is unaffected — every
+  path that produces `viewDate` already applies `props.locale` through the
+  internal `localDayjs` helper, which is why the existing locale tests pass
+  untouched with the line gone.
+* Adds coverage for `timeConstraints`, which had none.
+
 ## 5.0.2
 * Fixes every time-picker counter throwing `date[type] is not a function`, which
   left the hours, minutes, seconds, milliseconds and AM/PM controls unable to

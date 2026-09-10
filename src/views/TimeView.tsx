@@ -1,14 +1,7 @@
 /** @internal */
 import React, { useState, useEffect, useRef } from 'react';
 import dayjs from 'dayjs';
-import type { TimeUnit } from '../timeUnits';
-
-const timeConstraints = {
-	hours: { min: 0, max: 23, step: 1 },
-	minutes: { min: 0, max: 59, step: 1 },
-	seconds: { min: 0, max: 59, step: 1 },
-	milliseconds: { min: 0, max: 999, step: 1 }
-};
+import { DEFAULT_TIME_CONSTRAINTS, type TimeConstraint, type TimeConstraints, type TimeUnit } from '../timeUnits';
 
 /** A rendered counter: a real time unit, or the AM/PM toggle cell. */
 type Counter = TimeUnit | 'ampm';
@@ -16,17 +9,20 @@ type Counter = TimeUnit | 'ampm';
 interface TimeViewProps {
 	viewDate: dayjs.Dayjs;
 	selectedDate?: dayjs.Dayjs;
-	timeConstraints?: any;
+	timeConstraints?: TimeConstraints;
 	setTime: (type: TimeUnit, value: number) => void;
 	showView: (view: string) => void;
 	timeFormat: string;
 	dateFormat?: string | boolean;
 }
 
-function createConstraints(overrideTimeConstraints: any) {
-	const constraints: any = {};
-	Object.keys(timeConstraints).forEach(type => {
-		constraints[type] = { ...(timeConstraints as any)[type], ...(overrideTimeConstraints?.[type] || {}) };
+function createConstraints(
+	overrideTimeConstraints?: TimeConstraints
+): Record<TimeUnit, Required<TimeConstraint>> {
+	const units = Object.keys(DEFAULT_TIME_CONSTRAINTS) as TimeUnit[];
+	const constraints = {} as Record<TimeUnit, Required<TimeConstraint>>;
+	units.forEach(unit => {
+		constraints[unit] = { ...DEFAULT_TIME_CONSTRAINTS[unit], ...(overrideTimeConstraints?.[unit] ?? {}) };
 	});
 	return constraints;
 }

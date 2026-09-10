@@ -28,7 +28,7 @@ import DaysView from './views/DaysView';
 import MonthsView from './views/MonthsView';
 import YearsView from './views/YearsView';
 import TimeView from './views/TimeView';
-import { DAYJS_SETTER, type TimeUnit } from './timeUnits';
+import { DAYJS_SETTER, type TimeConstraint, type TimeConstraints, type TimeUnit } from './timeUnits';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -280,15 +280,16 @@ export interface DateTimeProps {
 	inputProps?: React.InputHTMLAttributes<HTMLInputElement> & Record<string, any>;
 
 	/**
-	 * Fine-grained constraints for the time spinner. Each key corresponds to a
-	 * time unit; each value may contain `min`, `max`, and `step`.
+	 * Fine-grained constraints for the time spinner. Each key is a
+	 * {@link TimeUnit}; each value may set `min`, `max`, and `step`. Omitted
+	 * fields keep that unit's default.
 	 *
 	 * @example Allow minutes only in 15-minute increments
 	 * ```tsx
 	 * <Datetime timeConstraints={{ minutes: { min: 0, max: 45, step: 15 } }} />
 	 * ```
 	 */
-	timeConstraints?: any;
+	timeConstraints?: TimeConstraints;
 
 	/**
 	 * Return `true` for dates that should be selectable, `false` to disable them.
@@ -816,13 +817,17 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 	};
 
 	const renderCalendar = () => {
-		const localizedViewDate = viewDate;
-		if (props.locale) localizedViewDate.locale(props.locale);
-
+		// `viewDate` already carries `props.locale`: every path that produces it
+		// goes through `localDayjs`, which applies the locale, and Day.js keeps it
+		// on derived instances. (This used to call `viewDate.locale(props.locale)`
+		// and drop the result — a Moment mutation idiom that Day.js, being
+		// immutable, silently ignored.)
 		const viewProps: any = {
-			viewDate: localizedViewDate,
+			viewDate,
 			selectedDate,
-			isValidDate: props.isValidDate || (() => true),
+			// Passed through as-is: MonthsView and YearsView skip their whole
+			// per-day scan when this is undefined, and DaysView defaults it.
+			isValidDate: props.isValidDate,
 			updateDate,
 			navigate: viewNavigate,
 			moment: localDayjs,
@@ -861,6 +866,8 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 
 Datetime.displayName = 'Datetime';
 (Datetime as any).dayjs = dayjs;
+
+export type { TimeConstraint, TimeConstraints, TimeUnit };
 
 /** @public */
 export { Datetime };

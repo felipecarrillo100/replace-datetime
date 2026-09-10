@@ -6,7 +6,7 @@ import ViewNavigation from '../parts/ViewNavigation';
 interface DaysViewProps {
 	viewDate: dayjs.Dayjs;
 	selectedDate?: dayjs.Dayjs;
-	isValidDate: (date: dayjs.Dayjs) => boolean;
+	isValidDate?: (date: dayjs.Dayjs) => boolean;
 	renderDay: (props: any, date: dayjs.Dayjs, selectedDate?: dayjs.Dayjs) => React.ReactNode;
 	updateDate: (e: React.MouseEvent) => void;
 	navigate: (amount: number, type: any) => void;

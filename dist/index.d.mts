@@ -2,6 +2,44 @@ import React from 'react';
 import dayjs from 'dayjs';
 
 /**
+ * A unit of time adjustable by the time-picker counters.
+ *
+ * These plural names are the component's vocabulary for time units: they are
+ * the keys of {@link TimeConstraints} and of the time view's counter state.
+ *
+ * @public
+ */
+type TimeUnit = 'hours' | 'minutes' | 'seconds' | 'milliseconds';
+/**
+ * Bounds and increment for a single time unit's counter.
+ *
+ * Any omitted field falls back to the built-in default for that unit
+ * (`hours` 0–23, `minutes` and `seconds` 0–59, `milliseconds` 0–999, all
+ * stepping by 1).
+ *
+ * @public
+ */
+interface TimeConstraint {
+    /** Lowest value the counter will show. */
+    min?: number;
+    /** Highest value the counter will show. */
+    max?: number;
+    /** Amount added or subtracted per click of the ▲/▼ buttons. */
+    step?: number;
+}
+/**
+ * Per-unit overrides for the time-picker counters, keyed by {@link TimeUnit}.
+ *
+ * @example Minutes in quarter-hour increments
+ * ```tsx
+ * <Datetime timeConstraints={{ minutes: { step: 15 } }} />
+ * ```
+ *
+ * @public
+ */
+type TimeConstraints = Partial<Record<TimeUnit, TimeConstraint>>;
+
+/**
  * @packageDocumentation
  * `replace-datetime` — A lightweight, fully-featured datetime picker for React 18 and 19.
  *
@@ -231,15 +269,16 @@ interface DateTimeProps {
      */
     inputProps?: React.InputHTMLAttributes<HTMLInputElement> & Record<string, any>;
     /**
-     * Fine-grained constraints for the time spinner. Each key corresponds to a
-     * time unit; each value may contain `min`, `max`, and `step`.
+     * Fine-grained constraints for the time spinner. Each key is a
+     * {@link TimeUnit}; each value may set `min`, `max`, and `step`. Omitted
+     * fields keep that unit's default.
      *
      * @example Allow minutes only in 15-minute increments
      * ```tsx
      * <Datetime timeConstraints={{ minutes: { min: 0, max: 45, step: 15 } }} />
      * ```
      */
-    timeConstraints?: any;
+    timeConstraints?: TimeConstraints;
     /**
      * Return `true` for dates that should be selectable, `false` to disable them.
      *
@@ -405,4 +444,4 @@ interface DateTimeProps {
  */
 declare const Datetime: React.ForwardRefExoticComponent<DateTimeProps & React.RefAttributes<DatetimeHandle>>;
 
-export { type DateTimeProps, Datetime, type DatetimeHandle, type ViewMode, Datetime as default };
+export { type DateTimeProps, Datetime, type DatetimeHandle, type TimeConstraint, type TimeConstraints, type TimeUnit, type ViewMode, Datetime as default };

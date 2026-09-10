@@ -82,6 +82,35 @@ function MyComponent() {
 | **onOpen** | `function` | | Callback when calendar opens. |
 | **onClose** | `function` | | Callback when calendar closes. |
 | **closeOnSelect** | `boolean` | `false` | Close calendar automatically after selection. |
+| **isValidDate** | `(date: dayjs) => boolean` | | Return `false` to disable a date. Omit it to leave every date selectable. |
+| **timeConstraints** | `TimeConstraints` | | Per-unit `min`/`max`/`step` overrides for the time counters. |
+
+### Time constraints
+
+Each key of `timeConstraints` is a time unit, and each value may set `min`, `max` and
+`step`. Anything you leave out keeps that unit's default — `hours` 0–23, `minutes` and
+`seconds` 0–59, `milliseconds` 0–999, all stepping by 1.
+
+```tsx
+// Minutes in quarter-hour increments; hours untouched.
+<Datetime timeConstraints={{ minutes: { step: 15 } }} />
+```
+
+The supporting types are exported, so the object can be built and typed outside the JSX:
+
+```tsx
+import Datetime, { type TimeConstraints } from 'replace-datetime';
+
+const constraints: TimeConstraints = {
+  hours: { min: 9, max: 17 },
+  minutes: { step: 15 },
+};
+
+<Datetime timeConstraints={constraints} />;
+```
+
+`TimeUnit` is `'hours' | 'minutes' | 'seconds' | 'milliseconds'`, and `TimeConstraint`
+is the `{ min?, max?, step? }` shape of a single entry.
 
 ### Imperative API
 

@@ -905,6 +905,88 @@ describe('Datetime', () => {
 			});
 		});
 
+		describe('isValidDate', () => {
+			// MonthsView and YearsView skip their per-day scan entirely when
+			// isValidDate is absent. The picker used to substitute `() => true`,
+			// which kept the guard from ever firing and made every month/year cell
+			// build throwaway Day.js objects to reach a foregone conclusion.
+			const countDayOfYearCalls = (props: any) => {
+				const proto: any = Object.getPrototypeOf(dayjs());
+				const original = proto.dayOfYear;
+				let calls = 0;
+				proto.dayOfYear = function (...args: any[]) {
+					calls++;
+					return original.apply(this, args);
+				};
+				try {
+					utils.createDatetime({ input: false, initialViewMode: 'years', ...props });
+				} finally {
+					proto.dayOfYear = original;
+				}
+				return calls;
+			};
+
+			it('is not scanned for when the prop is absent', () => {
+				expect(countDayOfYearCalls({})).toEqual(0);
+			});
+
+			it('is scanned for when the prop is supplied', () => {
+				expect(countDayOfYearCalls({ isValidDate: () => true })).toBeGreaterThan(0);
+			});
+
+			it('still disables years and months when supplied', () => {
+				const component = utils.createDatetime({
+					input: false,
+					initialViewMode: 'years',
+					initialValue: new Date(2000, 0, 15),
+					isValidDate: (d: any) => d.year() !== 2003
+				});
+
+				// The decade grid runs 1999..2010, so 2003 sits at index 4.
+				expect(utils.getNthYear(component, 4).hasClass('rdtDisabled')).toEqual(true);
+				expect(utils.getNthYear(component, 5).hasClass('rdtDisabled')).toEqual(false);
+			});
+		});
+
+		describe('timeConstraints', () => {
+			const pressMinuteUp = (component: any) => {
+				fireEvent.pointerDown(component.container.querySelectorAll('.rdtCounter .rdtBtn')[2]!);
+				fireEvent.pointerUp(document.body);
+			};
+
+			it('applies a custom step', () => {
+				const onChange = vi.fn();
+				const component = utils.createDatetime({
+					input: false,
+					initialViewMode: 'time',
+					timeFormat: 'HH:mm',
+					initialValue: new Date(2000, 0, 15, 10, 30),
+					timeConstraints: { minutes: { step: 15 } },
+					onChange
+				});
+
+				pressMinuteUp(component);
+				expect(onChange.mock.calls[0]![0].minute()).toEqual(45);
+			});
+
+			it('leaves unspecified units and fields on their defaults', () => {
+				const onChange = vi.fn();
+				const component = utils.createDatetime({
+					input: false,
+					initialViewMode: 'time',
+					timeFormat: 'HH:mm',
+					initialValue: new Date(2000, 0, 15, 10, 30),
+					// Only minutes.step is set: hours keeps step 1, minutes keeps max 59.
+					timeConstraints: { minutes: { step: 15 } },
+					onChange
+				});
+
+				fireEvent.pointerDown(component.container.querySelectorAll('.rdtCounter .rdtBtn')[0]!);
+				fireEvent.pointerUp(document.body);
+				expect(onChange.mock.calls[0]![0].hour()).toEqual(11);
+			});
+		});
+
 		describe('onChange', () => {
 			it('trigger only when last selection type is selected', () => {
 				const onChange = vi.fn();
