@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
+import React from 'react';
+import { fireEvent, render } from '@testing-library/react';
 import dayjs from 'dayjs';
+import Datetime from '../src/index';
 import utils from './testUtils';
 
 dayjs.locale('en');
@@ -654,6 +657,251 @@ describe('Datetime', () => {
 				utils.clickNthMonth(component, 2);
 				expect(utils.isYearView(component)).toBeTruthy();
 				expect(onNavigate).toHaveBeenCalledWith('years');
+			});
+		});
+
+		describe('time counters commit on pointer release', () => {
+			// Regression: setTime() used to index the Day.js object with the plural
+			// unit names the time view passes ('hours', 'minutes', …). Day.js only
+			// defines the singular setters, so every counter threw
+			// "date[type] is not a function" and the time was never applied.
+			it('increasing the hour applies the new time', () => {
+				const onChange = vi.fn();
+				const component = utils.createDatetime({
+					initialValue: new Date(2000, 0, 15, 10, 30, 45),
+					initialViewMode: 'time',
+					timeFormat: 'HH:mm:ss',
+					onChange
+				});
+
+				utils.increaseHour(component);
+				utils.releaseCounter();
+
+				expect(onChange).toHaveBeenCalledTimes(1);
+				expect(onChange.mock.calls[0]![0].hour()).toEqual(11);
+				expect(utils.getHours(component)).toEqual('11');
+			});
+
+			it('increasing the minute applies the new time', () => {
+				const onChange = vi.fn();
+				const component = utils.createDatetime({
+					initialValue: new Date(2000, 0, 15, 10, 30, 45),
+					initialViewMode: 'time',
+					timeFormat: 'HH:mm:ss',
+					onChange
+				});
+
+				utils.increaseMinute(component);
+				utils.releaseCounter();
+
+				expect(onChange.mock.calls[0]![0].minute()).toEqual(31);
+			});
+
+			it('decreasing the second applies the new time', () => {
+				const onChange = vi.fn();
+				const component = utils.createDatetime({
+					initialValue: new Date(2000, 0, 15, 10, 30, 45),
+					initialViewMode: 'time',
+					timeFormat: 'HH:mm:ss',
+					onChange
+				});
+
+				utils.decreaseSecond(component);
+				utils.releaseCounter();
+
+				expect(onChange.mock.calls[0]![0].second()).toEqual(44);
+			});
+
+			it('the AM/PM toggle applies the new time', () => {
+				const onChange = vi.fn();
+				const component = utils.createDatetime({
+					initialValue: new Date(2000, 0, 15, 10, 30),
+					initialViewMode: 'time',
+					timeFormat: 'h:mm A',
+					onChange
+				});
+
+				// The AM/PM cell commits immediately via toggleDayPart, no release needed.
+				const btns = component.container.querySelectorAll('.rdtCounter .rdtBtn');
+				fireEvent.pointerDown(btns[btns.length - 2]!);
+
+				expect(onChange).toHaveBeenCalledTimes(1);
+				expect(onChange.mock.calls[0]![0].hour()).toEqual(22);
+			});
+		});
+
+		describe('controlled mode (props.value)', () => {
+			// Regression: the only effect watching props.value used to sync viewDate
+			// alone, leaving selectedDate and inputValue stale. A parent that changed
+			// `value` saw old text in the input and an old .rdtActive highlight.
+			it('a new value from the parent updates the input', () => {
+				const component = utils.createDatetime({
+					value: dayjs('2025-06-15'),
+					dateFormat: 'YYYY-MM-DD',
+					timeFormat: false
+				});
+				expect(utils.getInputValue(component)).toEqual('2025-06-15');
+
+				component.setProps({
+					value: dayjs('2030-01-02'),
+					dateFormat: 'YYYY-MM-DD',
+					timeFormat: false
+				});
+				expect(utils.getInputValue(component)).toEqual('2030-01-02');
+			});
+
+			it('a new value from the parent moves the selected day', () => {
+				const props = { dateFormat: 'YYYY-MM-DD', timeFormat: false, input: false };
+				const component = utils.createDatetime({ ...props, value: dayjs('2025-06-15') });
+
+				expect(component.find('.rdtDay.rdtActive').length).toEqual(1);
+				expect(component.find('.rdtDay.rdtActive')[0]!.getAttribute('data-value')).toEqual('15');
+
+				component.setProps({ ...props, value: dayjs('2025-06-20') });
+				expect(component.find('.rdtDay.rdtActive')[0]!.getAttribute('data-value')).toEqual('20');
+			});
+
+			// The sync must compare by value, not identity. `value={dayjs(x)}` is a
+			// brand-new object on every parent render, so an identity-keyed effect
+			// would fire on unrelated re-renders and discard what the user typed.
+			it('an equal-but-new value object does not clobber typing in progress', () => {
+				const props = { dateFormat: 'YYYY-MM-DD', timeFormat: false };
+				const component = utils.createDatetime({ ...props, value: dayjs('2025-06-15') });
+
+				const input = component.container.querySelector('.form-control')!;
+				fireEvent.change(input, { target: { value: '2025-06-1' } });
+				expect(utils.getInputValue(component)).toEqual('2025-06-1');
+
+				// Parent re-renders for an unrelated reason, rebuilding an equal value.
+				component.setProps({ ...props, value: dayjs('2025-06-15') });
+				expect(utils.getInputValue(component)).toEqual('2025-06-1');
+			});
+
+			it('value="" clears the input and the selection', () => {
+				const props = { dateFormat: 'YYYY-MM-DD', timeFormat: false, input: false };
+				const component = utils.createDatetime({ ...props, value: dayjs('2025-06-15') });
+				expect(component.find('.rdtDay.rdtActive').length).toEqual(1);
+
+				component.setProps({ ...props, value: '' });
+				expect(component.find('.rdtDay.rdtActive').length).toEqual(0);
+			});
+
+			it('an unparseable string value is shown as typed', () => {
+				const props = { dateFormat: 'YYYY-MM-DD', timeFormat: false };
+				const component = utils.createDatetime({ ...props, value: dayjs('2025-06-15') });
+
+				component.setProps({ ...props, value: 'not a date' });
+				expect(utils.getInputValue(component)).toEqual('not a date');
+				expect(component.instance().state.selectedDate).toBeUndefined();
+			});
+
+			// value={null} means "uncontrolled" (the two onClose tests below rely on
+			// it), whereas value="" is a controlled *empty* value. The predicate is
+			// what gates setTime's internal writes, so probe it through a counter:
+			// updateDate is unguarded by design, so day clicks cannot tell them apart.
+			const pressHour = (component: any) => {
+				fireEvent.pointerDown(component.container.querySelectorAll('.rdtCounter .rdtBtn')[0]!);
+				fireEvent.pointerUp(document.body);
+			};
+
+			it('value={null} leaves the picker uncontrolled', () => {
+				const component = utils.createDatetime({
+					value: null,
+					input: false,
+					initialViewMode: 'time',
+					timeFormat: 'HH:mm',
+					initialValue: new Date(2000, 0, 15, 10, 30)
+				});
+
+				pressHour(component);
+				expect(component.instance().state.selectedDate.hour()).toEqual(11);
+			});
+
+			it('value="" leaves the picker controlled', () => {
+				const onChange = vi.fn();
+				const component = utils.createDatetime({
+					value: '',
+					input: false,
+					initialViewMode: 'time',
+					timeFormat: 'HH:mm',
+					initialViewDate: new Date(2000, 0, 15, 10, 30),
+					onChange
+				});
+
+				pressHour(component);
+
+				// onChange still reports the intent, but no internal state is written:
+				// a controlled picker waits for the host to send a new value back.
+				expect(onChange).toHaveBeenCalledTimes(1);
+				expect(onChange.mock.calls[0]![0].hour()).toEqual(11);
+				expect(component.instance().state.selectedDate).toBeUndefined();
+			});
+		});
+
+		describe('time counters in controlled mode', () => {
+			// The two defects compound: with the setter fixed but props.value not
+			// synced, TimeView reads `selectedDate || viewDate` and the stale
+			// selectedDate wins — so a controlled counter advanced one step and then
+			// wedged, re-applying the same value forever.
+			const ControlledDatetime = (props: any) => {
+				const [value, setValue] = React.useState<any>(props.initial);
+				return (
+					<Datetime
+						{...props}
+						value={value}
+						onChange={(v: any) => {
+							setValue(v);
+							props.onChange?.(v);
+						}}
+					/>
+				);
+			};
+
+			it('the hour counter advances on every press, not just the first', () => {
+				const component = render(
+					<ControlledDatetime
+						initial={dayjs('2000-01-15T10:30:00')}
+						input={false}
+						initialViewMode="time"
+						timeFormat="HH:mm"
+					/>
+				);
+
+				const hourUp = () => {
+					fireEvent.pointerDown(component.container.querySelectorAll('.rdtCounter .rdtBtn')[0]!);
+					fireEvent.pointerUp(document.body);
+				};
+				const hours = () => component.container.querySelector('.rdtCounter .rdtCount')!.textContent;
+
+				hourUp();
+				expect(hours()).toEqual('11');
+
+				hourUp();
+				expect(hours()).toEqual('12');
+			});
+
+			it('the AM/PM toggle round-trips', () => {
+				const onChange = vi.fn();
+				const component = render(
+					<ControlledDatetime
+						initial={dayjs('2000-01-15T10:30:00')}
+						input={false}
+						initialViewMode="time"
+						timeFormat="h:mm A"
+						onChange={onChange}
+					/>
+				);
+
+				const toggle = () => {
+					const btns = component.container.querySelectorAll('.rdtCounter .rdtBtn');
+					fireEvent.pointerDown(btns[btns.length - 2]!);
+				};
+
+				toggle();
+				expect(onChange.mock.calls[0]![0].hour()).toEqual(22);
+
+				toggle();
+				expect(onChange.mock.calls[1]![0].hour()).toEqual(10);
 			});
 		});
 

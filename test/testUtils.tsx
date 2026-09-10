@@ -103,6 +103,14 @@ export const decreaseSecond = (datetime: any) => {
 	if (btns[5]) fireEvent.pointerDown(btns[5]);
 };
 
+// The counters only commit their value to the component on `pointerup`, which
+// the increase*/decrease* helpers above deliberately do not fire so that they
+// can also be used to test the press-and-hold behaviour. Call this to finish
+// the gesture and let `setTime` run.
+export const releaseCounter = () => {
+	fireEvent.pointerUp(document.body);
+};
+
 export const getNthDay = (datetime: any, n: number) => {
 	const days = datetime.container.querySelectorAll('.rdtDay');
 	const day = days[n];
@@ -180,6 +188,7 @@ export default {
 	decreaseMinute,
 	increaseSecond,
 	decreaseSecond,
+	releaseCounter,
 	getNthDay,
 	getNthMonth,
 	getNthYear,

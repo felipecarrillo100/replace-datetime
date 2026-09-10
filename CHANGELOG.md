@@ -1,5 +1,78 @@
 Changelog
 =========
+
+## 5.0.2
+* Fixes every time-picker counter throwing `date[type] is not a function`, which
+  left the hours, minutes, seconds, milliseconds and AM/PM controls unable to
+  apply a value. `setTime` was calling the Day.js setter by moment's **plural**
+  unit name (`hours`, `minutes`, …); Day.js only defines the singular setters
+  (`hour`, `minute`, …), so the call threw and `onChange` never fired. The unit
+  names are now mapped to Day.js's spelling at the boundary, and typed so the
+  mismatch is a compile error rather than a runtime one. Thanks to the reporter
+  for the diagnosis and patch.
+  * The plural names remain the public vocabulary — `timeConstraints={{ minutes:
+    { step: 15 } }}` is unchanged.
+  * Consumers who applied the `Dayjs.prototype.hours = Dayjs.prototype.hour`
+    workaround can drop it after upgrading.
+* Adds regression coverage for the time counters. The existing helpers only fired
+  `pointerdown`, but the counters commit their value on `pointerup`, so the suite
+  had never actually invoked `setTime`.
+* Fixes controlled mode never syncing from `props.value`. The only effect watching
+  the prop updated the calendar's view date, leaving the selected date and the
+  input text stale, so a host that changed `value` — a Today button, a form reset
+  — saw the old date in the input and the old day highlighted. The two defects
+  compounded: because the time view reads the selected date in preference to the
+  view date, a *controlled* time picker would have advanced one step and then
+  wedged, re-applying the same value on every press. Both are fixed together.
+  * The sync compares by value, not by object identity, so passing
+    `value={dayjs(x)}` inline — a new object on every render — no longer discards
+    text you are part-way through typing.
+  * `value=""` now clears the picker, and an unparseable string value is shown
+    as typed instead of being silently dropped.
+* Settles what counts as controlled: `value={null}` and `value={undefined}` both
+  mean *uncontrolled*, as before, while `value=""` is a controlled *empty* value.
+  `setTime` previously used a falsy test and the view-date sync an `undefined`
+  test, so the two disagreed on `null` and `''`; both now share one predicate.
+  This is the release's only intentional behaviour change.
+
+## 5.0.1
+* Fixes packaging errors that broke `npm publish`.
+
+## 5.0.0
+* **Breaking:** replaces Moment.js with Day.js. `dayjs` is now the peer
+  dependency in place of `moment`, dates handed to and returned from the
+  component are `dayjs.Dayjs` objects, and the static accessor is
+  `Datetime.dayjs` rather than `Datetime.moment`. See `migrateToV3.md` and the
+  migration section of the README for the upgrade path.
+
+## 4.0.7
+* Fixes clicks not registering on mobile devices.
+
+## 4.0.6
+* Minor README fixes.
+
+## 4.0.5
+* Removes an unused dependency.
+
+## 4.0.4
+* Improves the demo and README.
+
+## 4.0.3
+* Adds dark and light themes.
+
+## 4.0.2
+* Fixes locale selection (fr, es, de, …) in the demo.
+
+## 4.0.1
+* First `replace-datetime` release on npm.
+
+## 4.0.0
+* Start of the `replace-datetime` fork of
+  [react-datetime](https://github.com/YouCanBookMe/react-datetime): rewritten as
+  functional components with hooks, TypeScript-native, React 18/19 ready
+  (including Strict Mode), and built with tsup. Every entry below 4.0.0 is
+  upstream `react-datetime` history.
+
 ## 3.3.1
 * Restores compatibility with React ^16.5.0
 

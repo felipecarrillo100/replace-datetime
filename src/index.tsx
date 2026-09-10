@@ -28,6 +28,7 @@ import DaysView from './views/DaysView';
 import MonthsView from './views/MonthsView';
 import YearsView from './views/YearsView';
 import TimeView from './views/TimeView';
+import { DAYJS_SETTER, type TimeUnit } from './timeUnits';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -488,6 +489,15 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 		inputProps = {},
 	} = props;
 
+	/**
+	 * Whether the picker is driven by `props.value` (controlled) or by its own
+	 * state (uncontrolled).
+	 *
+	 * Nullish rather than falsy on purpose: both `undefined` and `null` mean
+	 * "uncontrolled", while `value=""` is a controlled *empty* value.
+	 */
+	const isControlled = props.value != null;
+
 	const localDayjs = useCallback((date?: any, format?: string | boolean) => {
 		let m: dayjs.Dayjs;
 		const parseFormat = typeof format === 'string' ? format : undefined;
@@ -677,15 +687,15 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 		setViewDateState(vd);
 	}, [viewDate, onNavigateForward, onNavigateBack]);
 
-	const setTime = useCallback((type: string, value: number) => {
-		const date = (selectedDate || viewDate)[type as 'hour' | 'minute' | 'second' | 'millisecond'](value);
-		if (!props.value) {
+	const setTime = useCallback((type: TimeUnit, value: number) => {
+		const date = (selectedDate || viewDate)[DAYJS_SETTER[type]](value);
+		if (!isControlled) {
 			setSelectedDate(date);
 			setViewDateState(date);
 			setInputValue(date.format(getFormat('datetime')));
 		}
 		onChange(date);
-	}, [selectedDate, viewDate, props.value, getFormat, onChange]);
+	}, [selectedDate, viewDate, isControlled, getFormat, onChange]);
 
 	const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement> | string) => {
 		const value = typeof e === 'string' ? e : e.target.value;
@@ -713,12 +723,45 @@ const Datetime = forwardRef<DatetimeHandle, DateTimeProps>((props, ref) => {
 		});
 	}, [props.locale, props.utc, props.displayTimeZone, localDayjs]);
 
+	// Keep the internal state in step with `props.value` while controlled.
+	//
+	// The sync is keyed on the last value it actually applied, compared by value
+	// rather than by object identity: `value={dayjs(x)}` hands us a brand-new
+	// object on every parent render, and re-running the sync for an unchanged
+	// value would overwrite whatever the user has typed since. Comparing against
+	// this ref rather than against `selectedDate`/`inputValue` matters — typing
+	// clears `selectedDate`, so derived state cannot tell "the value changed"
+	// apart from "the value is the same but the user has edited".
+	const syncedValueRef = useRef<string | number | undefined>(undefined);
+
 	useEffect(() => {
-		if (props.value !== undefined) {
-			const vd = parseDate(props.value, getFormat('datetime'));
-			if (vd && vd.isValid()) setViewDateState(vd);
+		if (!isControlled) {
+			syncedValueRef.current = undefined;
+			return;
 		}
-	}, [props.value, parseDate, getFormat]);
+
+		const parsed = parseDate(props.value, getFormat('datetime'));
+		const isDate = !!parsed && parsed.isValid();
+
+		// A cleared picker ('') and a partial/unparseable string the host echoes
+		// back both key on the raw text; real dates key on their instant.
+		const key = isDate ? parsed!.valueOf() : (typeof props.value === 'string' ? props.value : '');
+		if (syncedValueRef.current === key) return;
+		syncedValueRef.current = key;
+
+		if (isDate) {
+			setViewDateState(prev => (prev && prev.isSame(parsed!) ? prev : parsed!));
+			setSelectedDate(prev => (prev && prev.isSame(parsed!) ? prev : parsed!));
+
+			const formatted = parsed!.format(getFormat('datetime'));
+			setInputValue(prev => (prev === formatted ? prev : formatted));
+			return;
+		}
+
+		const raw = typeof props.value === 'string' ? props.value : '';
+		setSelectedDate(undefined);
+		setInputValue(prev => (prev === raw ? prev : raw));
+	}, [isControlled, props.value, parseDate, getFormat]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {

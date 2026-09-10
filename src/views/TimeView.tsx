@@ -1,6 +1,7 @@
 /** @internal */
 import React, { useState, useEffect, useRef } from 'react';
 import dayjs from 'dayjs';
+import type { TimeUnit } from '../timeUnits';
 
 const timeConstraints = {
 	hours: { min: 0, max: 23, step: 1 },
@@ -9,11 +10,14 @@ const timeConstraints = {
 	milliseconds: { min: 0, max: 999, step: 1 }
 };
 
+/** A rendered counter: a real time unit, or the AM/PM toggle cell. */
+type Counter = TimeUnit | 'ampm';
+
 interface TimeViewProps {
 	viewDate: dayjs.Dayjs;
 	selectedDate?: dayjs.Dayjs;
 	timeConstraints?: any;
-	setTime: (type: string, value: number) => void;
+	setTime: (type: TimeUnit, value: number) => void;
 	showView: (view: string) => void;
 	timeFormat: string;
 	dateFormat?: string | boolean;
@@ -27,7 +31,7 @@ function createConstraints(overrideTimeConstraints: any) {
 	return constraints;
 }
 
-function pad(type: string, value: number | string) {
+function pad(type: TimeUnit, value: number | string) {
 	const padValues: any = { hours: 1, minutes: 2, seconds: 2, milliseconds: 3 };
 	let str = value + '';
 	while (str.length < padValues[type]) str = '0' + str;
@@ -80,8 +84,8 @@ export default function TimeView({
 
 	const isAMPM = () => timeFormat.toLowerCase().indexOf(' a') !== -1;
 
-	const getCounters = () => {
-		const counters = [];
+	const getCounters = (): Counter[] => {
+		const counters: Counter[] = [];
 		if (timeFormat.toLowerCase().indexOf('h') !== -1) {
 			counters.push('hours');
 			if (timeFormat.indexOf('m') !== -1) {
@@ -98,14 +102,14 @@ export default function TimeView({
 		return counters;
 	};
 
-	const increase = (type: string) => {
+	const increase = (type: TimeUnit) => {
 		const tc = constraints[type];
 		let value = parseInt(stateRef.current[type as keyof typeof state] as string, 10) + tc.step;
 		if (value > tc.max) value = tc.min + (value - (tc.max + 1));
 		return pad(type, value);
 	};
 
-	const decrease = (type: string) => {
+	const decrease = (type: TimeUnit) => {
 		const tc = constraints[type];
 		let value = parseInt(stateRef.current[type as keyof typeof state] as string, 10) - tc.step;
 		if (value < tc.min) value = tc.max + 1 - (tc.min - value);
@@ -119,7 +123,7 @@ export default function TimeView({
 		setTime('hours', hours);
 	};
 
-	const onStartClicking = (e: React.PointerEvent, action: 'increase' | 'decrease', type: string) => {
+	const onStartClicking = (e: React.PointerEvent, action: 'increase' | 'decrease', type: Counter) => {
 		if (e.button && e.button !== 0) return;
 		if (type === 'ampm') return toggleDayPart();
 
@@ -146,7 +150,7 @@ export default function TimeView({
 		document.body.addEventListener('pointercancel', mouseUpListenerRef.current);
 	};
 
-	const renderCounter = (type: string, value: string) => {
+	const renderCounter = (type: Counter, value: string) => {
 		let displayValue: string | number = value;
 		if (type === 'hours' && isAMPM()) {
 			displayValue = (parseInt(value, 10) - 1) % 12 + 1;
