@@ -52,6 +52,19 @@ html[data-theme="light"] {
   --transition: 0.2s ease;
 }
 
+/* ── Layout tokens ───────────────────────────────────────────────────────── */
+
+/* The centred content column. The sticky nav and the demo grid both derive
+   their horizontal geometry from these, so the two cannot drift apart. */
+html {
+  --container-max: 1200px;
+  --container-pad: 24px;
+  /* Inline padding on a single nav link. The nav's inner wrapper subtracts it
+     so link *text* lands on the grid's content edge rather than one link
+     padding to the right of it. */
+  --nav-link-pad: 18px;
+}
+
 /* ── Reset ───────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -321,17 +334,27 @@ html[data-theme="light"] .btn-sm:hover {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
+}
+
+/* Constrained to the same column as .demo-grid so the links align with the
+   cards. The bar itself is left full-bleed so its background, blur and border
+   still span the viewport. Scrolling lives here rather than on .demo-nav, so
+   the scroll container is the column and not the whole page width. */
+.demo-nav-inner {
+  max-width: var(--container-max);
+  width: 100%;
+  margin: 0 auto;
+  padding-inline: calc(var(--container-pad) - var(--nav-link-pad));
   display: flex;
   gap: 0;
   overflow-x: auto;
   scrollbar-width: none;
-  padding: 0 20px;
 }
-.demo-nav::-webkit-scrollbar { display: none; }
+.demo-nav-inner::-webkit-scrollbar { display: none; }
 
 .demo-nav a {
   display: inline-block;
-  padding: 14px 18px;
+  padding: 14px var(--nav-link-pad);
   font-size: 0.82rem;
   font-weight: 500;
   color: var(--text-muted);
@@ -348,7 +371,8 @@ html[data-theme="light"] .btn-sm:hover {
 
 .theme-toggle {
   margin-left: auto;
-  padding: 0 16px;
+  /* Matches the links so the icon lands on the grid's right content edge. */
+  padding: 0 var(--nav-link-pad);
   background: none;
   border: none;
   font-size: 1.1rem;
@@ -363,10 +387,10 @@ html[data-theme="light"] .btn-sm:hover {
 /* ── Demo grid ───────────────────────────────────────────────────────────── */
 .demo-grid {
   flex: 1;
-  max-width: 1200px;
+  max-width: var(--container-max);
   width: 100%;
   margin: 0 auto;
-  padding: 48px 24px 80px;
+  padding: 48px var(--container-pad) 80px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 500px), 1fr));
   gap: 28px;
@@ -578,8 +602,9 @@ td.weekend-day.rdtActive {
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
+  html { --container-pad: 16px; --nav-link-pad: 14px; }
   .hero { padding: 48px 16px 40px; }
-  .demo-grid { padding: 28px 16px 60px; gap: 20px; }
+  .demo-grid { padding: 28px var(--container-pad) 60px; gap: 20px; }
   .card-header, .card-body { padding: 18px; }
-  .demo-nav a { padding: 12px 14px; font-size: 0.78rem; }
+  .demo-nav a { padding: 12px var(--nav-link-pad); font-size: 0.78rem; }
 }

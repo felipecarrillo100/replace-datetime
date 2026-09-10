@@ -176,24 +176,26 @@ export default function App() {
 
       {/* ── Nav ──────────────────────────────────────────────────────────── */}
       <nav className="demo-nav" aria-label="Demo sections">
-        <a href="#demo-default">Standard</a>
-        <a href="#demo-basic">Basic</a>
-        <a href="#demo-time">Time Only</a>
-        <a href="#demo-datetime">Date + Time</a>
-        <a href="#demo-inline">Inline</a>
-        <a href="#demo-future">Valid Dates</a>
-        <a href="#demo-locale">Locale</a>
-        <a href="#demo-weekend">Custom Render</a>
-        <a href="#demo-ref">Imperative Ref</a>
-        <button
-          id="theme-toggle"
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
-          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
-        >
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
+        <div className="demo-nav-inner">
+          <a href="#demo-default">Standard</a>
+          <a href="#demo-basic">Basic</a>
+          <a href="#demo-time">Time Only</a>
+          <a href="#demo-datetime">Date + Time</a>
+          <a href="#demo-inline">Inline</a>
+          <a href="#demo-future">Valid Dates</a>
+          <a href="#demo-locale">Locale</a>
+          <a href="#demo-weekend">Custom Render</a>
+          <a href="#demo-ref">Imperative Ref</a>
+          <button
+            id="theme-toggle"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+        </div>
       </nav>
 
       {/* ── Demo grid ────────────────────────────────────────────────────── */}
